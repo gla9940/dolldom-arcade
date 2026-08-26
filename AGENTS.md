@@ -5,8 +5,11 @@
 - 프로젝트명: `dolldom-arcade`
 - 사이트명: 돌돔의 공간
 - 사이트 유형: 반응형 HTML5 미니게임 사이트
-- 배포 방식: Codex Sites
-- 공개 주소: `https://dolldom-arcade.gla9940.chatgpt.site/`
+- 기본 배포 방식: GitHub Pages
+- 기본 공개 주소: `https://gla9940.github.io/dolldom-arcade/`
+- GitHub 저장소: `https://github.com/gla9940/dolldom-arcade`
+- 백업 배포 방식: Codex Sites
+- 백업 공개 주소: `https://dolldom-arcade.gla9940.chatgpt.site/`
 - Flash와 SWF를 사용하지 않고 최신 데스크톱 및 모바일 브라우저를 지원한다.
 - 프로젝트 전체에서 영문 표기는 `doldom`이 아니라 `dolldom`을 사용한다.
 
@@ -46,18 +49,24 @@
 - 변경 후 가능한 범위에서 빌드와 주요 게임 흐름을 검증한다.
 - 사용자 변경사항과 관계없는 파일은 수정하지 않는다.
 
-## Sites 배포 주의사항
+## GitHub Pages 배포 주의사항
+
+- GitHub Pages를 기본 공개 배포로 사용한다.
+- `main` 브랜치에 푸시하기 전에 로컬 빌드와 주요 게임 흐름을 확인한다.
+- GitHub Pages 프로젝트 주소가 `/dolldom-arcade/` 하위에 있으므로 브라우저 자산은 `./app.js`, `./og.png`처럼 상대경로로 참조한다.
+- `/app.js`, `/og.png`처럼 도메인 루트를 가리키는 절대경로를 사용하지 않는다.
+- 검증된 변경사항을 커밋하고 `main` 브랜치에 푸시하면 GitHub Pages의 기존 게시 설정으로 자동 배포되도록 유지한다.
+
+## Codex Sites 백업 배포 주의사항
 
 - 기존 `.openai/hosting.json`을 삭제하거나 임의로 새로 만들지 않는다.
 - `.openai/hosting.json`에 기록된 기존 Sites 프로젝트 ID를 그대로 사용한다.
 - 동일한 로컬 사이트에 새 Sites 프로젝트를 중복 생성하지 않는다.
 - 배포 전에 현재 소스 상태를 확인하고 로컬 빌드를 검증한다.
-- 배포가 필요한 변경은 기존 Sites 프로젝트의 새 버전으로 저장하고 배포한다.
+- Codex Sites에도 배포해 달라는 요청이 있을 때만 기존 Sites 프로젝트의 새 버전으로 저장하고 배포한다.
 - 사이트 접근 권한, 공개 상태, 사용자 도메인은 사용자가 요청한 경우에만 변경한다.
 - 사이트 제목 변경과 공개 URL 변경을 같은 작업으로 간주하지 않는다.
 
 ## 향후 작업
 
-- GitHub 저장소 생성 및 소스 업로드
-- VS Code와 GitHub 연결
 - 필요 시 사용자 소유 도메인 연결

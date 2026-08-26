@@ -27,7 +27,7 @@ export default {
       return new Response(bytes,{headers:{...headers,'content-type':'image/png','cache-control':'public, max-age=86400'}});
     }
     if(url.pathname==='/'||url.pathname==='/index.html') {
-      const page=html.replaceAll('content="/og.png"', 'content="'+url.origin+'/og.png"');
+      const page=html.replaceAll('content="./og.png"', 'content="'+url.origin+'/og.png"');
       return new Response(page,{headers:{...headers,'content-type':'text/html; charset=utf-8','cache-control':'public, max-age=60'}});
     }
     return new Response('Not found',{status:404,headers});
