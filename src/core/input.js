@@ -1,0 +1,92 @@
+const DEFAULT_BINDINGS = {
+  left: ['ArrowLeft', 'KeyA'],
+  right: ['ArrowRight', 'KeyD'],
+  up: ['ArrowUp', 'KeyW'],
+  down: ['ArrowDown', 'KeyS'],
+  action: ['Space', 'Enter'],
+  pause: ['Escape', 'KeyP'],
+  restart: ['KeyR'],
+  game1: ['Digit1', 'Numpad1'],
+  game2: ['Digit2', 'Numpad2'],
+  game3: ['Digit3', 'Numpad3'],
+};
+
+const BLOCKED_SCROLL_ACTIONS = new Set(['left', 'right', 'up', 'down', 'action']);
+
+function isInteractiveElement(element) {
+  if (!(element instanceof Element)) return false;
+
+  return Boolean(
+    element.closest(
+      'input, textarea, select, button, a, [contenteditable]:not([contenteditable="false"]), [role="textbox"]',
+    ),
+  );
+}
+
+export function createInputManager({ target = window, bindings = DEFAULT_BINDINGS } = {}) {
+  const actionByCode = new Map();
+  const pressedCodes = new Set();
+  const pressListeners = new Map();
+  let gameplayActive = false;
+
+  Object.entries(bindings).forEach(([action, codes]) => {
+    codes.forEach((code) => actionByCode.set(code, action));
+  });
+
+  function emitPress(action, event) {
+    pressListeners.get(action)?.forEach((listener) => listener(event));
+  }
+
+  function handleKeyDown(event) {
+    if (isInteractiveElement(event.target) || isInteractiveElement(document.activeElement)) return;
+
+    const action = actionByCode.get(event.code);
+    if (!action) return;
+
+    if (gameplayActive && BLOCKED_SCROLL_ACTIONS.has(action)) {
+      event.preventDefault();
+    }
+
+    if (pressedCodes.has(event.code)) return;
+    pressedCodes.add(event.code);
+    emitPress(action, event);
+  }
+
+  function handleKeyUp(event) {
+    pressedCodes.delete(event.code);
+  }
+
+  function handleBlur() {
+    pressedCodes.clear();
+  }
+
+  target.addEventListener('keydown', handleKeyDown);
+  target.addEventListener('keyup', handleKeyUp);
+  target.addEventListener('blur', handleBlur);
+
+  return {
+    onPress(action, listener) {
+      const listeners = pressListeners.get(action) ?? new Set();
+      listeners.add(listener);
+      pressListeners.set(action, listeners);
+      return () => listeners.delete(listener);
+    },
+
+    isPressed(action) {
+      return bindings[action]?.some((code) => pressedCodes.has(code)) ?? false;
+    },
+
+    setGameplayActive(active) {
+      gameplayActive = Boolean(active);
+      if (!gameplayActive) pressedCodes.clear();
+    },
+
+    destroy() {
+      target.removeEventListener('keydown', handleKeyDown);
+      target.removeEventListener('keyup', handleKeyUp);
+      target.removeEventListener('blur', handleBlur);
+      pressedCodes.clear();
+      pressListeners.clear();
+    },
+  };
+}
