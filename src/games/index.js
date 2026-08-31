@@ -2,6 +2,7 @@ import { dodgeGame } from './dodge/game.js';
 import { memoryGame } from './memory/game.js';
 import { reactionGame } from './reaction/game.js';
 import { runnerGame } from './runner/game.js';
+import { shooterGame } from './shooter/game.js';
 
 function validateGameDefinition(game, index) {
   const label = game?.id || `index ${index}`;
@@ -46,6 +47,12 @@ export function createGameRegistry(definitions) {
   return Object.freeze(validatedGames);
 }
 
-export const games = createGameRegistry([runnerGame, memoryGame, reactionGame, dodgeGame]);
+export const games = createGameRegistry([
+  runnerGame,
+  memoryGame,
+  reactionGame,
+  dodgeGame,
+  shooterGame,
+]);
 
 export const gamesById = new Map(games.map((game) => [game.id, game]));

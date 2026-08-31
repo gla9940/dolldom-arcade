@@ -82,9 +82,10 @@ export function createTouchControls(container, input) {
       pointerActions.clear();
       availableActions = new Set(actions);
       const directionalActions = ['left', 'up', 'down', 'right'];
-      container.dataset.layout = directionalActions.every((action) => availableActions.has(action))
-        ? 'dpad'
-        : 'action';
+      const hasDpad = directionalActions.every((action) => availableActions.has(action));
+      container.dataset.layout = hasDpad && availableActions.has('action')
+        ? 'dpad-action'
+        : hasDpad ? 'dpad' : 'action';
       refreshVisibility();
     },
 

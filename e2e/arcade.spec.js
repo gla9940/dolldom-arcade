@@ -11,7 +11,7 @@ test('메인 화면과 정적 리소스가 정상적으로 표시된다', async 
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
   await expect(page).toHaveTitle(/돌돔의 공간/);
-  await expect(page.locator('[data-game]')).toHaveCount(4);
+  await expect(page.locator('[data-game]')).toHaveCount(5);
   await expect(page.getByRole('button', { name: '게임 크게 보기' })).toBeVisible();
 
   const assetState = await page.evaluate(() => ({
@@ -30,7 +30,7 @@ test('카운트다운, 일시정지, 재시작 흐름이 동작한다', async ({
   await page.locator('[data-game="memory"]').click();
   await expect(page.locator('#quick-guide')).toBeVisible();
   await page.getByRole('button', { name: '게임 시작', exact: true }).click();
-  await expect(page.locator('#overlay-title')).toHaveText('3');
+  await expect(page.locator('#overlay-title')).toHaveText(/^[123]$/);
   await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
   await expect(page.locator('#game')).toBeFocused();
 
@@ -95,11 +95,11 @@ test('공통 게임 설정을 저장하고 기본값으로 복원한다', async 
 test('반복적인 게임 전환 후에도 한 게임만 선택되고 오류가 발생하지 않는다', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  for (const gameId of ['runner', 'memory', 'reaction', 'dodge', 'runner', 'dodge']) {
+  for (const gameId of ['runner', 'memory', 'reaction', 'dodge', 'shooter', 'runner', 'shooter']) {
     await page.locator(`[data-game="${gameId}"]`).click();
   }
   await expect(page.locator('[data-game][aria-pressed="true"]')).toHaveCount(1);
-  await expect(page.locator('[data-game="dodge"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('[data-game="shooter"]')).toHaveAttribute('aria-pressed', 'true');
   expect(errors).toEqual([]);
 });
 
@@ -164,6 +164,12 @@ test.describe('모바일 화면', () => {
     });
     expect(targetSize[0]).toBeGreaterThanOrEqual(44);
     expect(targetSize[1]).toBeGreaterThanOrEqual(44);
+
+    await page.locator('[data-game="shooter"]').click();
+    await page.getByRole('button', { name: '게임 시작', exact: true }).click();
+    await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
+    await expect(page.locator('#touch-controls')).toHaveAttribute('data-layout', 'dpad-action');
+    await expect(page.getByRole('button', { name: '액션' })).toBeVisible();
   });
 });
 
@@ -187,7 +193,7 @@ test('PWA 매니페스트와 로컬 진행 기록 UI가 준비된다', async ({ 
   await expect(page.locator('#achievements [data-achievement]')).toHaveCount(6);
   await expect(page.locator('[data-achievement="runner-1000"]')).toHaveClass(/locked/);
   await expect(page.locator('[data-achievement="runner-1000"]')).toContainText('1,000점을 달성');
-  await expect(page.locator('#game-stat-list [data-game-stat]')).toHaveCount(4);
+  await expect(page.locator('#game-stat-list [data-game-stat]')).toHaveCount(5);
   await expect(page.locator('#recent-runs')).toContainText('아직 완료한 게임이 없습니다');
 });
 

@@ -8,6 +8,8 @@ export const templateGame = {
   kicker: 'GAME 00 / NEW',
   copy: '게임의 목표와 핵심 조작을 한 문장으로 설명하세요.',
   hint: 'SPACE / TAP — 액션',
+  accessibility: '새 미니게임의 화면 구성과 목표, 키보드 조작을 설명하세요.',
+  ariaKeyShortcuts: 'Space Enter Escape',
   card: {
     badge: 'NEW · ACTION',
     icon: '◆',

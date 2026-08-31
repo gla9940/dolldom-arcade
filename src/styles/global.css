@@ -63,7 +63,7 @@ button:focus-visible, a:focus-visible, canvas:focus-visible, input:focus-visible
 .section-head { display: flex; justify-content: space-between; align-items: end; margin: 44px 0 18px; }
 .section-head h2 { font-size: 27px; margin: 4px 0 0; }
 .section-head p { margin: 0; color: var(--muted); font-size: 13px; }
-.games { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding-bottom: 40px; }
+.games { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; padding-bottom: 40px; }
 .card { border: 1px solid var(--line); background: #0d0915dd; border-radius: 16px; padding: 14px 14px 34px; transition: 0.2s; cursor: pointer; position: relative; color: var(--text); text-align: left; font: inherit; }
 .card:hover, .card.active { border-color: var(--purple); transform: translateY(-5px); box-shadow: 0 12px 34px #0008; }
 .card.active::after { content: 'PLAYING'; position: absolute; right: 22px; top: 22px; color: var(--lime); font-size: 9px; font-weight: 800; letter-spacing: 0.12em; }
@@ -74,6 +74,7 @@ button:focus-visible, a:focus-visible, canvas:focus-visible, input:focus-visible
 .thumb.two { background: linear-gradient(135deg, #35102e, #16113c); }
 .thumb.three { background: linear-gradient(135deg, #18352d, #2b1240); }
 .thumb.four { background: linear-gradient(135deg, #31104d, #082f3c); }
+.thumb.five { background: linear-gradient(135deg, #102f3d, #42122f); }
 .badge { position: absolute; left: 10px; top: 10px; background: #060509cc; border: 1px solid #ffffff25; border-radius: 20px; padding: 5px 8px; font-size: 10px; color: var(--lime); }
 .card h3 { margin: 13px 0 4px; }
 .meta { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 11px; }
@@ -172,6 +173,10 @@ body.high-contrast .shortcut { color: #f6f2ff; }
   .hero-copy .button { grid-column: 2; grid-row: 2 / 4; margin-bottom: 26px; }
   .hero h1 { font-size: 72px; }
   .games { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 1180px) and (min-width: 901px) {
+  .games { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 700px) {

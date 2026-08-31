@@ -19,6 +19,11 @@ const EFFECTS = {
     { frequency: 940, duration: 0.14, type: 'sine', delay: 0.15 },
   ],
   catch: [{ frequency: 680, duration: 0.05 }],
+  shoot: [{ frequency: 760, duration: 0.035, type: 'square' }],
+  hit: [
+    { frequency: 260, duration: 0.04, type: 'sawtooth' },
+    { frequency: 520, duration: 0.05, delay: 0.025 },
+  ],
   miss: [{ frequency: 150, duration: 0.1, type: 'sawtooth' }],
   wrong: [{ frequency: 190, duration: 0.04 }],
   gameOver: [

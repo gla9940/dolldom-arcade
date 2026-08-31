@@ -33,12 +33,19 @@
 .touch-control:active { border-color: var(--lime); background: #251638; transform: scale(0.94); }
 body.touch-large .touch-control { min-width: 60px; min-height: 60px; }
 body.touch-large .touch-controls[data-layout='dpad'] { grid-template-columns: repeat(3, minmax(60px, 76px)); grid-template-rows: repeat(2, 60px); }
+body.touch-large .touch-controls[data-layout='dpad-action'] { grid-template-columns: repeat(4, minmax(60px, 76px)); grid-template-rows: repeat(2, 60px); }
 body.touch-large .touch-controls[data-layout='action'] { grid-template-columns: minmax(120px, 160px); }
 .touch-controls[data-layout='dpad'] { grid-template-columns: repeat(3, minmax(52px, 64px)); grid-template-rows: repeat(2, 48px); }
 .touch-controls[data-layout='dpad'] .touch-up { grid-column: 2; grid-row: 1; }
 .touch-controls[data-layout='dpad'] .touch-left { grid-column: 1; grid-row: 2; }
 .touch-controls[data-layout='dpad'] .touch-down { grid-column: 2; grid-row: 2; }
 .touch-controls[data-layout='dpad'] .touch-right { grid-column: 3; grid-row: 2; }
+.touch-controls[data-layout='dpad-action'] { grid-template-columns: repeat(4, minmax(52px, 68px)); grid-template-rows: repeat(2, 52px); }
+.touch-controls[data-layout='dpad-action'] .touch-up { grid-column: 2; grid-row: 1; }
+.touch-controls[data-layout='dpad-action'] .touch-left { grid-column: 1; grid-row: 2; }
+.touch-controls[data-layout='dpad-action'] .touch-down { grid-column: 2; grid-row: 2; }
+.touch-controls[data-layout='dpad-action'] .touch-right { grid-column: 3; grid-row: 2; }
+.touch-controls[data-layout='dpad-action'] .touch-action { grid-column: 4; grid-row: 1 / 3; min-height: 100%; }
 .touch-controls[data-layout='action'] { grid-template-columns: minmax(92px, 132px); }
 .touch-controls[data-layout='action'] .touch-action { width: 100%; }
 
@@ -88,6 +95,7 @@ body.game-focus-mode { overflow: hidden; }
 @media (max-width: 430px) {
   .touch-controls { grid-template-columns: repeat(5, minmax(44px, 1fr)); gap: 6px; }
   .touch-controls[data-layout='dpad'] { grid-template-columns: repeat(3, minmax(52px, 64px)); }
+  .touch-controls[data-layout='dpad-action'] { grid-template-columns: repeat(4, minmax(48px, 62px)); }
   .touch-control { min-width: 44px; min-height: 48px; }
   .toolbar { grid-template-columns: minmax(100px, 1fr) repeat(4, 42px); }
   .toolbar .hint { grid-column: 1 / -1; }

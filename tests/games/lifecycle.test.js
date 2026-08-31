@@ -142,3 +142,27 @@ test('포인터 중심 게임도 공통 키보드 액션으로 플레이할 수 
     );
   }
 });
+
+test('네온 슈터는 공통 논리 입력으로 이동하고 연속 발사한다', () => {
+  const pressedActions = new Set(['right', 'action']);
+  const sounds = [];
+  const scores = [];
+  const game = games.find(({ id }) => id === 'shooter').create({
+    context: createContextStub(),
+    width: 720,
+    height: 360,
+    input: { isPressed(action) { return pressedActions.has(action); } },
+    sound: { play(name) { sounds.push(name); } },
+    settings: { get() { return undefined; } },
+    onScore(score) { scores.push(score); },
+    onEnd() {},
+  });
+
+  game.init();
+  game.update(0.2);
+  game.render();
+  game.destroy();
+
+  assert.ok(sounds.includes('shoot'));
+  assert.ok(scores.at(-1) > 0);
+});

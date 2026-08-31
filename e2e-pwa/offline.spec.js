@@ -23,7 +23,7 @@ test('설치된 앱 셸은 네트워크가 끊겨도 다시 열린다', async ({
   try {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await expect(page).toHaveTitle(/돌돔의 공간/);
-    await expect(page.locator('[data-game]')).toHaveCount(4);
+    await expect(page.locator('[data-game]')).toHaveCount(5);
     await expect(page.locator('#system-status')).toContainText('OFFLINE');
   } finally {
     await context.setOffline(false);
