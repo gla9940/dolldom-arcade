@@ -29,9 +29,17 @@ function createArcadeApp() {
   const pauseButton = requiredElement('#pause');
   const restartButton = requiredElement('#restart');
   const muteButton = requiredElement('#mute');
+  const focusModeButton = requiredElement('#focus-mode');
   const playNowButton = requiredElement('#play-now');
   const announcer = requiredElement('#announcer');
   const gameCards = [...document.querySelectorAll('[data-game]')];
+  const focusBackgroundElements = [
+    document.querySelector('.topbar'),
+    document.querySelector('.hero-copy'),
+    document.querySelector('#arcade'),
+    document.querySelector('.tips'),
+    document.querySelector('.footer'),
+  ].filter(Boolean);
   const abortController = new AbortController();
   const { signal } = abortController;
 
@@ -49,6 +57,7 @@ function createArcadeApp() {
   let score = 0;
   let displayedScore = null;
   let playNowTimer = 0;
+  let focusMode = false;
 
   const loop = createGameLoop({
     update(deltaTime) {
@@ -89,6 +98,36 @@ function createArcadeApp() {
     muteButton.textContent = sound.muted ? '×' : '♪';
     muteButton.setAttribute('aria-label', sound.muted ? '소리 켜기' : '음소거');
     muteButton.title = sound.muted ? '소리 켜기' : '음소거';
+  }
+
+  function setFocusMode(enabled, { restoreFocus = true } = {}) {
+    if (focusMode === enabled) return;
+
+    focusMode = enabled;
+    document.body.classList.toggle('game-focus-mode', enabled);
+    consoleElement.classList.toggle('focus-mode', enabled);
+    focusModeButton.textContent = enabled ? '×' : '⛶';
+    focusModeButton.setAttribute('aria-pressed', String(enabled));
+    focusModeButton.setAttribute('aria-label', enabled ? '크게 보기 닫기' : '게임 크게 보기');
+    focusModeButton.title = enabled ? '크게 보기 닫기' : '게임 크게 보기';
+
+    focusBackgroundElements.forEach((element) => {
+      element.toggleAttribute('inert', enabled);
+      if (enabled) element.setAttribute('aria-hidden', 'true');
+      else element.removeAttribute('aria-hidden');
+    });
+
+    if (enabled) {
+      canvas.focus({ preventScroll: true });
+      announce('게임 크게 보기 켜짐. ESC 키로 닫을 수 있습니다.');
+    } else {
+      if (restoreFocus) focusModeButton.focus({ preventScroll: true });
+      announce('게임 크게 보기 꺼짐');
+    }
+
+    requestAnimationFrame(() => {
+      if (surface.resize()) activeGame?.render();
+    });
   }
 
   function showOverlay({ kicker, title, copy, action, showScore = false }) {
@@ -162,6 +201,7 @@ function createArcadeApp() {
     input.setGameplayActive(true);
     sound.tone(420, 0.09);
     loop.start();
+    canvas.focus({ preventScroll: true });
     announce(`${activeDefinition.title} 시작`);
   }
 
@@ -245,7 +285,10 @@ function createArcadeApp() {
           activeGame.onAction?.('action');
         }
       }),
-      input.onPress('pause', pauseGame),
+      input.onPress('pause', (event) => {
+        if (event.code === 'Escape' && focusMode) setFocusMode(false);
+        pauseGame();
+      }),
       input.onPress('restart', restartGame),
       input.onPress('game1', () => selectGame(games[0].id)),
       input.onPress('game2', () => selectGame(games[1].id)),
@@ -257,6 +300,7 @@ function createArcadeApp() {
   overlayAction.addEventListener('click', startGame, { signal });
   pauseButton.addEventListener('click', pauseGame, { signal });
   restartButton.addEventListener('click', restartGame, { signal });
+  focusModeButton.addEventListener('click', () => setFocusMode(!focusMode), { signal });
   muteButton.addEventListener(
     'click',
     () => {
@@ -302,6 +346,7 @@ function createArcadeApp() {
   return {
     destroy() {
       window.clearTimeout(playNowTimer);
+      setFocusMode(false, { restoreFocus: false });
       loop.stop();
       activeGame?.destroy?.();
       removeInputListeners.forEach((removeListener) => removeListener());

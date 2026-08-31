@@ -35,6 +35,10 @@ body::before {
 }
 
 button, a { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, canvas:focus-visible {
+  outline: 3px solid var(--lime);
+  outline-offset: 4px;
+}
 .wrap { width: min(1440px, calc(100% - 32px)); margin: auto; position: relative; }
 .topbar { height: 78px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
 .brand { display: flex; gap: 12px; align-items: center; font-weight: 800; }
@@ -95,4 +99,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .section-head { align-items: start; }
   .section-head p { max-width: 120px; text-align: right; }
   .footer { flex-direction: column; gap: 8px; align-items: start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

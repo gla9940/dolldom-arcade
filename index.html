@@ -40,23 +40,27 @@
               <span class="live-score" id="live-score">SCORE 0000</span>
             </div>
             <div class="screen" id="screen">
-              <canvas id="game" width="720" height="360" tabindex="0" aria-label="게임 화면"></canvas>
+              <canvas id="game" width="720" height="360" tabindex="0" aria-label="게임 화면" aria-describedby="hint">
+                이 게임은 Canvas를 지원하는 최신 브라우저에서 실행할 수 있습니다.
+              </canvas>
               <div class="game-overlay" id="overlay">
                 <div class="overlay-card">
                   <div class="overlay-kicker" id="overlay-kicker">GAME 01 / READY</div>
                   <h2 id="overlay-title">네온 러너</h2>
                   <p id="overlay-copy">스페이스바 또는 화면을 눌러 장애물을 뛰어넘으세요.</p>
                   <div class="overlay-score" id="overlay-score" hidden>0</div>
-                  <button class="button primary" id="overlay-action">게임 시작</button>
+                  <button class="button primary" id="overlay-action" type="button">게임 시작</button>
                 </div>
               </div>
             </div>
             <div class="toolbar">
               <div class="hint" id="hint">SPACE / TAP — 점프</div>
-              <button class="tool" id="pause" aria-label="일시정지" title="일시정지">Ⅱ</button>
-              <button class="tool" id="restart" aria-label="다시 시작" title="다시 시작">↻</button>
-              <button class="tool" id="mute" aria-label="음소거" title="음소거">♪</button>
+              <button class="tool" id="pause" type="button" aria-label="일시정지" title="일시정지">Ⅱ</button>
+              <button class="tool" id="restart" type="button" aria-label="다시 시작" title="다시 시작">↻</button>
+              <button class="tool" id="mute" type="button" aria-label="음소거" title="음소거">♪</button>
+              <button class="tool" id="focus-mode" type="button" aria-label="게임 크게 보기" aria-pressed="false" title="게임 크게 보기">⛶</button>
             </div>
+            <p class="focus-tip">기기를 가로로 돌리면 게임 화면을 더 크게 볼 수 있어요.</p>
             <div class="sr-only" id="announcer" aria-live="polite"></div>
           </section>
         </section>
@@ -70,7 +74,7 @@
             <p>최고 기록은 이 기기에 저장됩니다</p>
           </div>
           <div class="games">
-            <button class="card active" data-game="runner" aria-pressed="true">
+            <button class="card active" type="button" data-game="runner" aria-pressed="true">
               <div class="thumb one"><span class="badge">EASY · RUN</span>🐟</div>
               <h3>네온 러너</h3>
               <div class="meta">
@@ -79,7 +83,7 @@
               </div>
               <span class="shortcut">1</span>
             </button>
-            <button class="card" data-game="memory" aria-pressed="false">
+            <button class="card" type="button" data-game="memory" aria-pressed="false">
               <div class="thumb two"><span class="badge">NORMAL · MEMORY</span>🃏</div>
               <h3>글리치 메모리</h3>
               <div class="meta">
@@ -88,7 +92,7 @@
               </div>
               <span class="shortcut">2</span>
             </button>
-            <button class="card" data-game="reaction" aria-pressed="false">
+            <button class="card" type="button" data-game="reaction" aria-pressed="false">
               <div class="thumb three"><span class="badge">HARD · REACTION</span>▣</div>
               <h3>블록 캐처</h3>
               <div class="meta">

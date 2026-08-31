@@ -12,14 +12,43 @@
 .overlay-card h2 { font-size: 28px; margin: 8px 0; }
 .overlay-card p { font-size: 13px; color: var(--muted); line-height: 1.55; margin: 0 0 16px; }
 .overlay-score { font: 400 48px 'Black Han Sans', Impact, sans-serif; color: var(--lime); text-shadow: 0 0 20px #b9ff3866; margin: 4px 0; }
-.toolbar { display: grid; grid-template-columns: 1fr repeat(3, auto); gap: 8px; align-items: center; padding-top: 13px; }
+.toolbar { display: grid; grid-template-columns: 1fr repeat(4, auto); gap: 8px; align-items: center; padding-top: 13px; }
 .hint { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tool { width: 42px; height: 42px; border: 1px solid #44355e; border-radius: 9px; color: var(--text); background: #171022; cursor: pointer; font-size: 16px; transition: 0.16s; }
 .tool:hover { border-color: var(--lime); color: var(--lime); }
 .tool:active { transform: scale(0.92); }
+.focus-tip { display: none; margin: 8px 0 0; color: var(--muted); font-size: 11px; text-align: center; }
+
+body.game-focus-mode { overflow: hidden; }
+.console.focus-mode {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  border: 0;
+  border-radius: 0;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  align-content: center;
+  background: radial-gradient(circle at 50% 10%, #241044, transparent 40%), #07050c;
+}
+.console.focus-mode .console-head,
+.console.focus-mode .toolbar,
+.console.focus-mode .focus-tip { width: min(100%, 1100px); margin-inline: auto; }
+.console.focus-mode .screen { width: min(100%, 140vh); justify-self: center; }
+.console.focus-mode .toolbar { padding-top: 10px; }
 
 @media (max-width: 900px) { .console { max-width: 760px; } }
 
 @media (max-width: 700px) {
-  .toolbar { grid-template-columns: 1fr repeat(3, 42px); }
+  .toolbar { grid-template-columns: minmax(0, 1fr) repeat(4, 42px); }
+  .console { padding: 11px; border-radius: 16px; }
+  .hint { font-size: 10px; }
+}
+
+@media (orientation: portrait) and (max-width: 700px) {
+  .console.focus-mode .focus-tip { display: block; }
 }

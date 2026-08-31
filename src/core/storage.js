@@ -24,7 +24,9 @@ export function getBestScore(gameId) {
 }
 
 export function saveBestScore(gameId, score) {
-  const bestScore = Math.max(getBestScore(gameId), Math.max(0, Math.floor(score)));
+  const numericScore = Number(score);
+  const safeScore = Number.isFinite(numericScore) ? Math.max(0, Math.floor(numericScore)) : 0;
+  const bestScore = Math.max(getBestScore(gameId), safeScore);
   write(`best-${gameId}`, bestScore);
   return bestScore;
 }
