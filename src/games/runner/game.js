@@ -1,5 +1,12 @@
 import { drawBackdrop, palette } from '../shared/rendering.js';
 
+const DIFFICULTY = {
+  initialSpeed: 285,
+  maximumSpeed: 470,
+  speedGainPerSecond: 3,
+  minimumSpawnDelay: 0.72,
+};
+
 export const runnerGame = {
   id: 'runner',
   name: 'NEON RUNNER',
@@ -7,6 +14,15 @@ export const runnerGame = {
   kicker: 'GAME 01 / EASY',
   copy: '스페이스바 또는 화면을 눌러 장애물을 뛰어넘으세요.',
   hint: 'SPACE / TAP — 점프',
+  card: {
+    badge: 'EASY · RUN',
+    icon: '🐟',
+    theme: 'one',
+    summary: '장애물을 뛰어넘으세요',
+    difficulty: '쉬움',
+    estimatedTime: '1~3분',
+    controls: 'SPACE / TAP',
+  },
 
   create({ context, width, height, onScore, onEnd, sound }) {
     let state;
@@ -16,7 +32,8 @@ export const runnerGame = {
         player: { x: 94, y: 270, velocityY: 0, width: 42, height: 42 },
         obstacles: [],
         spawnDelay: 0,
-        speed: 285,
+        speed: DIFFICULTY.initialSpeed,
+        elapsedTime: 0,
         distance: 0,
       };
       onScore(0);
@@ -27,13 +44,18 @@ export const runnerGame = {
       if (player.y < 269) return;
 
       player.velocityY = -620;
-      sound.tone(520, 0.08);
+      sound.play('jump');
     }
 
     function update(deltaTime) {
       const player = state.player;
       player.velocityY += 1500 * deltaTime;
       player.y = Math.min(270, player.y + player.velocityY * deltaTime);
+      state.elapsedTime += deltaTime;
+      state.speed = Math.min(
+        DIFFICULTY.maximumSpeed,
+        DIFFICULTY.initialSpeed + state.elapsedTime * DIFFICULTY.speedGainPerSecond,
+      );
       state.spawnDelay -= deltaTime;
       state.distance += state.speed * deltaTime;
 
@@ -45,14 +67,17 @@ export const runnerGame = {
           width: 20 + Math.random() * 18,
           height: obstacleHeight,
         });
-        state.spawnDelay = 0.85 + Math.random() * 0.75;
-        state.speed = Math.min(470, state.speed + 3);
+        state.spawnDelay = Math.max(
+          DIFFICULTY.minimumSpawnDelay,
+          0.9 + Math.random() * 0.7 - state.elapsedTime * 0.004,
+        );
       }
 
-      state.obstacles.forEach((obstacle) => {
+      for (let index = state.obstacles.length - 1; index >= 0; index -= 1) {
+        const obstacle = state.obstacles[index];
         obstacle.x -= state.speed * deltaTime;
-      });
-      state.obstacles = state.obstacles.filter((obstacle) => obstacle.x > -60);
+        if (obstacle.x <= -60) state.obstacles.splice(index, 1);
+      }
       onScore(state.distance / 18);
 
       for (const obstacle of state.obstacles) {

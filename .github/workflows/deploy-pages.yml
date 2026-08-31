@@ -29,8 +29,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Run unit tests
+        run: npm test
+
+      - name: Run browser tests
+        run: npm run test:e2e
+
       - name: Build site
         run: npm run build
+
+      - name: Check bundle budget
+        run: npm run check:bundle
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

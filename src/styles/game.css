@@ -2,7 +2,7 @@
 .console-head { display: flex; justify-content: space-between; align-items: center; padding: 0 3px 12px; }
 .game-name { font-size: 13px; font-weight: 800; letter-spacing: 0.08em; }
 .live-score { font-size: 13px; color: var(--lime); font-variant-numeric: tabular-nums; }
-.screen { aspect-ratio: 2 / 1; border-radius: 12px; background: #050609; position: relative; overflow: hidden; border: 2px solid #211933; touch-action: none; }
+.screen { aspect-ratio: 2 / 1; border-radius: 12px; background: #050609; position: relative; overflow: hidden; border: 2px solid #211933; touch-action: none; user-select: none; -webkit-user-select: none; }
 .screen::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 4px, #fff 5px 6px); opacity: 0.025; }
 .screen canvas { width: 100%; height: 100%; display: block; }
 .game-overlay { position: absolute; inset: 0; display: grid; place-items: center; background: #07050cc7; z-index: 2; opacity: 1; transition: 0.2s; }
@@ -10,13 +10,23 @@
 .overlay-card { text-align: center; padding: 22px; max-width: 330px; }
 .overlay-kicker { font-size: 11px; color: var(--lime); letter-spacing: 0.16em; font-weight: 800; }
 .overlay-card h2 { font-size: 28px; margin: 8px 0; }
+.overlay-card h2.countdown-number { font: 400 clamp(68px, 12vw, 104px) / 0.9 'Black Han Sans', Impact, sans-serif; color: var(--lime); text-shadow: 0 0 30px #b9ff3888; animation: countdown-pop 0.65s ease-out both; }
 .overlay-card p { font-size: 13px; color: var(--muted); line-height: 1.55; margin: 0 0 16px; }
-.overlay-score { font: 400 48px 'Black Han Sans', Impact, sans-serif; color: var(--lime); text-shadow: 0 0 20px #b9ff3866; margin: 4px 0; }
-.toolbar { display: grid; grid-template-columns: 1fr repeat(4, auto); gap: 8px; align-items: center; padding-top: 13px; }
+.quick-guide { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; list-style: none; padding: 0; margin: 0 0 16px; }
+.quick-guide li { display: grid; gap: 5px; justify-items: center; padding: 8px 6px; border: 1px solid #ffffff14; border-radius: 8px; background: #ffffff08; color: var(--muted); font-size: 10px; }
+.quick-guide kbd { color: var(--lime); font: 700 10px monospace; }
+.result-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 0 0 17px; }
+.result-stats div { padding: 9px 15px; border: 1px solid #ffffff16; border-radius: 9px; background: #08060dcc; }
+.result-stats span { display: block; color: var(--muted); font-size: 9px; letter-spacing: 0.12em; }
+.result-stats strong { display: block; margin-top: 2px; color: var(--lime); font: 400 28px 'Black Han Sans', Impact, sans-serif; }
+.toolbar { display: grid; grid-template-columns: minmax(0, 1fr) repeat(2, auto) minmax(104px, 132px) repeat(2, auto); gap: 8px; align-items: center; padding-top: 13px; }
 .hint { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tool { width: 42px; height: 42px; border: 1px solid #44355e; border-radius: 9px; color: var(--text); background: #171022; cursor: pointer; font-size: 16px; transition: 0.16s; }
 .tool:hover { border-color: var(--lime); color: var(--lime); }
 .tool:active { transform: scale(0.92); }
+.volume-control { min-width: 0; height: 42px; display: grid; grid-template-columns: auto minmax(42px, 1fr) auto; gap: 6px; align-items: center; padding: 0 8px; border: 1px solid #44355e; border-radius: 9px; background: #171022; color: var(--muted); font-size: 9px; }
+.volume-control output { min-width: 28px; color: var(--lime); font-variant-numeric: tabular-nums; }
+.volume-control input { width: 100%; min-width: 0; accent-color: var(--lime); cursor: pointer; }
 .focus-tip { display: none; margin: 8px 0 0; color: var(--muted); font-size: 11px; text-align: center; }
 
 body.game-focus-mode { overflow: hidden; }
@@ -41,12 +51,37 @@ body.game-focus-mode { overflow: hidden; }
 .console.focus-mode .screen { width: min(100%, 140vh); justify-self: center; }
 .console.focus-mode .toolbar { padding-top: 10px; }
 
+@keyframes countdown-pop {
+  from { opacity: 0; transform: scale(1.45); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 @media (max-width: 900px) { .console { max-width: 760px; } }
 
 @media (max-width: 700px) {
-  .toolbar { grid-template-columns: minmax(0, 1fr) repeat(4, 42px); }
+  .toolbar { grid-template-columns: minmax(0, 1fr) repeat(2, 42px) minmax(78px, 98px) repeat(2, 42px); gap: 6px; }
   .console { padding: 11px; border-radius: 16px; }
   .hint { font-size: 10px; }
+  .volume-control { padding: 0 6px; gap: 4px; }
+  .volume-control span { display: none; }
+}
+
+@media (max-width: 430px) {
+  .toolbar { grid-template-columns: minmax(100px, 1fr) repeat(4, 42px); }
+  .toolbar .hint { grid-column: 1 / -1; }
+  .toolbar #pause { grid-column: 2; }
+  .toolbar #restart { grid-column: 3; }
+  .toolbar .volume-control { grid-column: 1; grid-row: 2; width: auto; grid-template-columns: minmax(42px, 1fr) auto; }
+  .toolbar #mute { grid-column: 4; }
+  .toolbar #focus-mode { grid-column: 5; }
+  .volume-control input { width: 100%; }
+  .overlay-card { padding: 9px; }
+  .overlay-card h2 { margin: 4px 0; font-size: 22px; }
+  .overlay-card p { margin-bottom: 8px; font-size: 11px; line-height: 1.35; }
+  .overlay-card .button { min-height: 38px; padding: 8px 14px; }
+  .quick-guide { margin-bottom: 8px; }
+  .quick-guide li { padding: 4px; }
+  .quick-guide li span { display: none; }
 }
 
 @media (orientation: portrait) and (max-width: 700px) {

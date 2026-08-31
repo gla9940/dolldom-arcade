@@ -1,5 +1,13 @@
 import { drawBackdrop, palette } from '../shared/rendering.js';
 
+const DIFFICULTY = {
+  initialSpeed: 115,
+  maximumSpeed: 250,
+  speedGainPerSecond: 4.5,
+  initialSpawnDelay: 0.72,
+  minimumSpawnDelay: 0.3,
+};
+
 export const reactionGame = {
   id: 'reaction',
   name: 'BLOCK CATCHER',
@@ -7,6 +15,15 @@ export const reactionGame = {
   kicker: 'GAME 03 / HARD',
   copy: '블록이 바닥에 닿기 전에 클릭하세요. 다섯 개를 놓치면 종료됩니다.',
   hint: 'CLICK / TAP — 블록 잡기',
+  card: {
+    badge: 'HARD · REACTION',
+    icon: '▣',
+    theme: 'three',
+    summary: '떨어지기 전에 터치하세요',
+    difficulty: '어려움',
+    estimatedTime: '1~2분',
+    controls: 'CLICK / TAP',
+  },
 
   create({ context, width, height, onScore, onEnd, sound }) {
     let state;
@@ -16,7 +33,7 @@ export const reactionGame = {
         blocks: [],
         spawnDelay: 0,
         lives: 5,
-        speed: 115,
+        speed: DIFFICULTY.initialSpeed,
         elapsedTime: 0,
         hits: 0,
       };
@@ -26,7 +43,10 @@ export const reactionGame = {
     function update(deltaTime) {
       state.spawnDelay -= deltaTime;
       state.elapsedTime += deltaTime;
-      state.speed = Math.min(260, 115 + state.elapsedTime * 5);
+      state.speed = Math.min(
+        DIFFICULTY.maximumSpeed,
+        DIFFICULTY.initialSpeed + state.elapsedTime * DIFFICULTY.speedGainPerSecond,
+      );
 
       if (state.spawnDelay <= 0) {
         const size = 34 + Math.random() * 24;
@@ -37,18 +57,25 @@ export const reactionGame = {
           color: Math.random() > 0.5 ? palette.pink : palette.purple,
           phase: Math.random() * 6,
         });
-        state.spawnDelay = Math.max(0.25, 0.7 - state.elapsedTime * 0.012);
+        state.spawnDelay = Math.max(
+          DIFFICULTY.minimumSpawnDelay,
+          DIFFICULTY.initialSpawnDelay - state.elapsedTime * 0.01,
+        );
       }
 
       state.blocks.forEach((block) => {
         block.y += state.speed * deltaTime;
       });
 
-      const missedBlocks = state.blocks.filter((block) => block.y > height + 10).length;
+      let missedBlocks = 0;
+      for (let index = state.blocks.length - 1; index >= 0; index -= 1) {
+        if (state.blocks[index].y <= height + 10) continue;
+        state.blocks.splice(index, 1);
+        missedBlocks += 1;
+      }
       if (missedBlocks) {
         state.lives -= missedBlocks;
-        sound.tone(130, 0.12, 'sawtooth');
-        state.blocks = state.blocks.filter((block) => block.y <= height + 10);
+        sound.play('miss');
         if (state.lives <= 0) {
           onEnd('신호를 놓쳤어요!');
           return;
@@ -71,12 +98,12 @@ export const reactionGame = {
           state.blocks.splice(index, 1);
           state.hits += 1;
           onScore(state.elapsedTime * 8 + state.hits * 100);
-          sound.tone(640 + state.hits * 12, 0.05);
+          sound.play('catch');
           return;
         }
       }
 
-      sound.tone(180, 0.03);
+      sound.play('wrong');
     }
 
     function render() {

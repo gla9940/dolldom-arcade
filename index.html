@@ -5,14 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#07050c" />
     <meta name="description" content="달리고, 뒤집고, 터치하는 네온 HTML5 미니 아케이드." />
+    <meta name="keywords" content="미니게임, HTML5 게임, 브라우저 게임, 네온 아케이드" />
+    <meta name="color-scheme" content="dark" />
     <meta property="og:title" content="돌돔의 공간 — Neon Mini Arcade" />
     <meta property="og:description" content="설치 없이 즐기는 세 개의 네온 미니게임." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="%BASE_URL%og.png" />
+    <meta property="og:url" content="https://gla9940.github.io/dolldom-arcade/" />
+    <meta property="og:image" content="%BASE_URL%og-social.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="돌돔의 공간 — Neon Mini Arcade" />
     <meta name="twitter:description" content="설치 없이 즐기는 세 개의 네온 미니게임." />
-    <meta name="twitter:image" content="%BASE_URL%og.png" />
+    <meta name="twitter:image" content="%BASE_URL%og-social.jpg" />
+    <link rel="canonical" href="https://gla9940.github.io/dolldom-arcade/" />
+    <link rel="icon" type="image/png" href="%BASE_URL%favicon.png" />
+    <link rel="apple-touch-icon" href="%BASE_URL%favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" />
     <title>돌돔의 공간 — Neon Mini Arcade</title>
     <link rel="stylesheet" href="./src/styles/global.css" />
     <link rel="stylesheet" href="./src/styles/game.css" />
@@ -48,7 +59,15 @@
                   <div class="overlay-kicker" id="overlay-kicker">GAME 01 / READY</div>
                   <h2 id="overlay-title">네온 러너</h2>
                   <p id="overlay-copy">스페이스바 또는 화면을 눌러 장애물을 뛰어넘으세요.</p>
-                  <div class="overlay-score" id="overlay-score" hidden>0</div>
+                  <ul class="quick-guide" id="quick-guide" hidden>
+                    <li><kbd>SPACE</kbd><span>키보드 액션</span></li>
+                    <li><kbd>TAP</kbd><span>모바일 액션</span></li>
+                    <li><kbd>ESC</kbd><span>일시정지</span></li>
+                  </ul>
+                  <div class="result-stats" id="result-stats" hidden>
+                    <div><span>CURRENT</span><strong id="overlay-score">0000</strong></div>
+                    <div><span>BEST</span><strong id="overlay-best">0000</strong></div>
+                  </div>
                   <button class="button primary" id="overlay-action" type="button">게임 시작</button>
                 </div>
               </div>
@@ -57,6 +76,11 @@
               <div class="hint" id="hint">SPACE / TAP — 점프</div>
               <button class="tool" id="pause" type="button" aria-label="일시정지" title="일시정지">Ⅱ</button>
               <button class="tool" id="restart" type="button" aria-label="다시 시작" title="다시 시작">↻</button>
+              <label class="volume-control" for="volume" title="효과음 음량">
+                <span>VOL</span>
+                <input id="volume" type="range" min="0" max="100" step="5" aria-label="효과음 음량" />
+                <output id="volume-value" for="volume">65%</output>
+              </label>
               <button class="tool" id="mute" type="button" aria-label="음소거" title="음소거">♪</button>
               <button class="tool" id="focus-mode" type="button" aria-label="게임 크게 보기" aria-pressed="false" title="게임 크게 보기">⛶</button>
             </div>
@@ -73,34 +97,8 @@
             </div>
             <p>최고 기록은 이 기기에 저장됩니다</p>
           </div>
-          <div class="games">
-            <button class="card active" type="button" data-game="runner" aria-pressed="true">
-              <div class="thumb one"><span class="badge">EASY · RUN</span>🐟</div>
-              <h3>네온 러너</h3>
-              <div class="meta">
-                <span>장애물을 뛰어넘으세요</span>
-                <span class="score" data-best="runner">BEST 0000</span>
-              </div>
-              <span class="shortcut">1</span>
-            </button>
-            <button class="card" type="button" data-game="memory" aria-pressed="false">
-              <div class="thumb two"><span class="badge">NORMAL · MEMORY</span>🃏</div>
-              <h3>글리치 메모리</h3>
-              <div class="meta">
-                <span>짝을 찾아 기억을 깨우세요</span>
-                <span class="score" data-best="memory">BEST 0000</span>
-              </div>
-              <span class="shortcut">2</span>
-            </button>
-            <button class="card" type="button" data-game="reaction" aria-pressed="false">
-              <div class="thumb three"><span class="badge">HARD · REACTION</span>▣</div>
-              <h3>블록 캐처</h3>
-              <div class="meta">
-                <span>떨어지기 전에 터치하세요</span>
-                <span class="score" data-best="reaction">BEST 0000</span>
-              </div>
-              <span class="shortcut">3</span>
-            </button>
+          <div class="games" id="game-list">
+            <noscript>게임 목록과 플레이 기능을 사용하려면 JavaScript를 활성화해주세요.</noscript>
           </div>
         </section>
 
@@ -118,10 +116,22 @@
             <span>최고 기록은 브라우저에만 저장되며 서버로 전송되지 않아요.</span>
           </div>
         </section>
+
+        <section class="updates" aria-labelledby="updates-title">
+          <div>
+            <div class="eyebrow">SYSTEM UPDATE / v1.1.0</div>
+            <h2 id="updates-title">이번 업데이트</h2>
+          </div>
+          <ul>
+            <li>게임 시작 카운트다운과 결과 기록 화면</li>
+            <li>모바일 집중 모드와 효과음 음량 조절</li>
+            <li>접근성·성능·자동 테스트 강화</li>
+          </ul>
+        </section>
       </main>
 
       <footer class="footer">
-        <span>© 돌돔의 공간 · HTML5 MINI ARCADE</span>
+        <span>© 돌돔의 공간 · HTML5 MINI ARCADE · v1.1.0</span>
         <span>NO FLASH. JUST PLAY.</span>
       </footer>
     </div>

@@ -38,3 +38,25 @@ export function getMuted() {
 export function saveMuted(muted) {
   write('muted', Boolean(muted));
 }
+
+export function getVolume() {
+  const volume = Number(read('volume', 0.65));
+  return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0.65;
+}
+
+export function saveVolume(volume) {
+  const numericVolume = Number(volume);
+  const safeVolume = Number.isFinite(numericVolume)
+    ? Math.min(1, Math.max(0, numericVolume))
+    : 0.65;
+  write('volume', safeVolume);
+  return safeVolume;
+}
+
+export function hasSeenGuide() {
+  return read('guide-seen', 'false') === 'true';
+}
+
+export function saveGuideSeen() {
+  write('guide-seen', true);
+}

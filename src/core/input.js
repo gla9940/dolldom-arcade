@@ -1,3 +1,10 @@
+const GAME_SHORTCUT_BINDINGS = Object.fromEntries(
+  Array.from({ length: 9 }, (_, index) => {
+    const number = index + 1;
+    return [`game${number}`, [`Digit${number}`, `Numpad${number}`]];
+  }),
+);
+
 const DEFAULT_BINDINGS = {
   left: ['ArrowLeft', 'KeyA'],
   right: ['ArrowRight', 'KeyD'],
@@ -6,9 +13,7 @@ const DEFAULT_BINDINGS = {
   action: ['Space', 'Enter'],
   pause: ['Escape', 'KeyP'],
   restart: ['KeyR'],
-  game1: ['Digit1', 'Numpad1'],
-  game2: ['Digit2', 'Numpad2'],
-  game3: ['Digit3', 'Numpad3'],
+  ...GAME_SHORTCUT_BINDINGS,
 };
 
 const BLOCKED_SCROLL_ACTIONS = new Set(['left', 'right', 'up', 'down', 'action']);

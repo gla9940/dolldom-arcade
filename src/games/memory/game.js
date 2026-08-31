@@ -13,6 +13,15 @@ export const memoryGame = {
   kicker: 'GAME 02 / NORMAL',
   copy: '45초 안에 같은 네온 심볼 여섯 쌍을 모두 찾으세요.',
   hint: 'CLICK / TAP — 카드 뒤집기',
+  card: {
+    badge: 'NORMAL · MEMORY',
+    icon: '🃏',
+    theme: 'two',
+    summary: '짝을 찾아 기억을 깨우세요',
+    difficulty: '보통',
+    estimatedTime: '45초',
+    controls: 'CLICK / TAP',
+  },
 
   create({ context, width, height, onScore, onEnd, sound }) {
     let state;
@@ -73,7 +82,7 @@ export const memoryGame = {
       if (!card || card.open || card.matched) return;
 
       card.open = true;
-      sound.tone(360 + cardIndex * 18, 0.06);
+      sound.play('flip');
 
       if (state.firstCardIndex === null) {
         state.firstCardIndex = cardIndex;
@@ -86,7 +95,7 @@ export const memoryGame = {
         card.matched = true;
         state.matches += 1;
         state.firstCardIndex = null;
-        sound.tone(720, 0.12, 'sine');
+        sound.play('match');
 
         if (state.matches === 6) {
           state.finalScore = Math.round(1500 + state.timeRemaining * 30);

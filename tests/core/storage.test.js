@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { getBestScore, getMuted, saveBestScore, saveMuted } from '../../src/core/storage.js';
+import {
+  getBestScore,
+  getMuted,
+  getVolume,
+  hasSeenGuide,
+  saveBestScore,
+  saveGuideSeen,
+  saveMuted,
+  saveVolume,
+} from '../../src/core/storage.js';
 
 function useMemoryStorage(initialValues = {}) {
   const values = new Map(Object.entries(initialValues));
@@ -49,4 +58,18 @@ test('음소거 설정을 문자열 저장값으로 복원한다', () => {
 
   assert.equal(values.get('dolldom-muted'), 'true');
   assert.equal(getMuted(), true);
+});
+
+test('음량을 유효 범위로 제한하고 첫 방문 안내 상태를 저장한다', () => {
+  const values = useMemoryStorage();
+
+  assert.equal(getVolume(), 0.65);
+  assert.equal(saveVolume(1.4), 1);
+  assert.equal(getVolume(), 1);
+  assert.equal(saveVolume(-0.2), 0);
+  assert.equal(values.get('dolldom-volume'), '0');
+  assert.equal(hasSeenGuide(), false);
+
+  saveGuideSeen();
+  assert.equal(hasSeenGuide(), true);
 });
