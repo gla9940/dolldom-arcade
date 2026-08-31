@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createGameRegistry, games } from '../../src/games/index.js';
+import { getDodgeDifficulty } from '../../src/games/dodge/game.js';
 
 function createContextStub() {
   const gradient = { addColorStop() {} };
@@ -100,4 +101,15 @@ test('게임 레지스트리는 중복 id와 불완전한 정의를 거부한다
     () => createGameRegistry([{ id: 'broken', name: 'BROKEN' }]),
     /title 값이 필요합니다/,
   );
+});
+
+test('보이드 드리프터는 안전한 초반 이후 세 단계로 난이도가 상승한다', () => {
+  const opening = getDodgeDifficulty(0);
+  const middle = getDodgeDifficulty(16);
+  const late = getDodgeDifficulty(40);
+
+  assert.deepEqual([opening.wave, middle.wave, late.wave], [1, 2, 3]);
+  assert.ok(opening.spawnInterval > middle.spawnInterval);
+  assert.ok(middle.spawnInterval > late.spawnInterval);
+  assert.ok(late.spawnInterval >= 0.36);
 });

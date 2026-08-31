@@ -124,13 +124,13 @@
 
         <section class="updates" aria-labelledby="updates-title">
           <div>
-            <div class="eyebrow">SYSTEM UPDATE / v1.2.0</div>
+            <div class="eyebrow">SYSTEM UPDATE / v1.3.0</div>
             <h2 id="updates-title">이번 업데이트</h2>
           </div>
           <ul>
-            <li>신규 Canvas 게임 보이드 드리프터</li>
-            <li>공통 모바일 조작과 오프라인 설치</li>
-            <li>로컬 통계·업적과 테스트 강화</li>
+            <li>보이드 드리프터 웨이브·피격 연출 개선</li>
+            <li>게임별 평균·최근 플레이 상세 기록</li>
+            <li>잠긴 업적 진행률과 달성 알림 추가</li>
           </ul>
         </section>
 
@@ -145,14 +145,25 @@
           <dl class="progress-stats">
             <div><dt>도전 횟수</dt><dd id="total-plays">0</dd></div>
             <div><dt>누적 점수</dt><dd id="total-score">0</dd></div>
-            <div><dt>업적</dt><dd><span id="achievement-count">0</span> / 6</dd></div>
+            <div><dt>업적</dt><dd><span id="achievement-count">0</span> / <span id="achievement-total">6</span></dd></div>
           </dl>
-          <ul class="achievements" id="achievements" aria-label="획득한 업적"></ul>
+          <div class="record-grid">
+            <section aria-labelledby="game-stats-title">
+              <h3 id="game-stats-title">게임별 통계</h3>
+              <div class="game-stat-list" id="game-stat-list"></div>
+            </section>
+            <section aria-labelledby="recent-runs-title">
+              <h3 id="recent-runs-title">최근 플레이</h3>
+              <ol class="recent-runs" id="recent-runs"></ol>
+            </section>
+          </div>
+          <h3 class="achievement-title">업적 진행도</h3>
+          <ul class="achievements" id="achievements" aria-label="전체 업적 진행도"></ul>
         </section>
       </main>
 
       <footer class="footer">
-        <span>© 돌돔의 공간 · HTML5 MINI ARCADE · v1.2.0</span>
+        <span>© 돌돔의 공간 · HTML5 MINI ARCADE · v1.3.0</span>
         <span>NO FLASH. JUST PLAY.</span>
       </footer>
     </div>
@@ -160,6 +171,10 @@
     <aside class="app-notice" id="app-notice" role="status" hidden>
       <span id="app-notice-copy"></span>
       <button id="app-notice-action" type="button" hidden></button>
+    </aside>
+    <aside class="achievement-toast" id="achievement-toast" role="status" aria-live="assertive" hidden>
+      <span>ACHIEVEMENT UNLOCKED</span>
+      <strong id="achievement-toast-title"></strong>
     </aside>
 
     <script type="module" src="./src/main.js"></script>

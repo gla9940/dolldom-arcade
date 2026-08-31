@@ -97,7 +97,12 @@ function createArcadeApp() {
   const totalPlaysElement = requiredElement('#total-plays');
   const totalScoreElement = requiredElement('#total-score');
   const achievementCountElement = requiredElement('#achievement-count');
+  const achievementTotalElement = requiredElement('#achievement-total');
   const achievementsElement = requiredElement('#achievements');
+  const gameStatList = requiredElement('#game-stat-list');
+  const recentRunsElement = requiredElement('#recent-runs');
+  const achievementToast = requiredElement('#achievement-toast');
+  const achievementToastTitle = requiredElement('#achievement-toast-title');
   const resetRecordsButton = requiredElement('#reset-records');
   const gameCards = [...document.querySelectorAll('[data-game]')];
   const focusBackgroundElements = [
@@ -137,6 +142,7 @@ function createArcadeApp() {
   let playNowTimer = 0;
   let countdownTimer = 0;
   let resizeFrameId = 0;
+  let achievementToastTimer = 0;
   let focusMode = false;
   let guideSeen = hasSeenGuide();
 
@@ -174,27 +180,116 @@ function createArcadeApp() {
     totalPlaysElement.textContent = snapshot.totalPlays.toLocaleString('ko-KR');
     totalScoreElement.textContent = snapshot.totalScore.toLocaleString('ko-KR');
     achievementCountElement.textContent = String(snapshot.achievements.length);
-    const unlocked = new Set(snapshot.achievements);
-    const items = achievementDefinitions
-      .filter((achievement) => unlocked.has(achievement.id))
-      .map((achievement) => {
-        const item = document.createElement('li');
-        item.title = achievement.description;
-        item.textContent = `◆ ${achievement.title}`;
-        return item;
+    achievementTotalElement.textContent = String(achievementDefinitions.length);
+
+    const statCards = games.map((definition) => {
+      const stats = snapshot.games[definition.id];
+      const card = document.createElement('article');
+      card.className = 'game-stat';
+      card.dataset.gameStat = definition.id;
+      const title = document.createElement('strong');
+      title.textContent = definition.title;
+      const details = document.createElement('dl');
+      const average = stats.completed ? Math.floor(stats.totalScore / stats.completed) : 0;
+      const specialty = definition.id === 'memory'
+        ? ['복구', stats.clears.toLocaleString('ko-KR')]
+        : definition.id === 'dodge'
+          ? ['최장', `${Math.floor(stats.bestRun / 20)}초`]
+          : ['최고', stats.bestRun.toLocaleString('ko-KR')];
+      [
+        ['도전', stats.plays.toLocaleString('ko-KR')],
+        ['평균', average.toLocaleString('ko-KR')],
+        specialty,
+      ].forEach(([label, value]) => {
+        const group = document.createElement('div');
+        const term = document.createElement('dt');
+        const description = document.createElement('dd');
+        term.textContent = label;
+        description.textContent = value;
+        group.append(term, description);
+        details.append(group);
       });
-    if (!items.length) {
+      card.append(title, details);
+      return card;
+    });
+    gameStatList.replaceChildren(...statCards);
+
+    const recentRuns = snapshot.recentRuns.map((run) => {
+      const definition = gamesById.get(run.gameId);
+      const item = document.createElement('li');
+      const title = document.createElement('strong');
+      const score = document.createElement('span');
+      const playedAt = document.createElement('time');
+      title.textContent = definition?.title ?? run.gameId;
+      score.textContent = `${run.score.toLocaleString('ko-KR')}점`;
+      if (run.playedAt) {
+        playedAt.dateTime = run.playedAt;
+        playedAt.textContent = new Intl.DateTimeFormat('ko-KR', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(new Date(run.playedAt));
+      } else {
+        playedAt.textContent = '이전 기록';
+      }
+      item.append(title, score, playedAt);
+      return item;
+    });
+    if (!recentRuns.length) {
       const empty = document.createElement('li');
       empty.className = 'empty';
-      empty.textContent = '게임을 완료하면 업적이 열립니다.';
-      items.push(empty);
+      empty.textContent = '아직 완료한 게임이 없습니다.';
+      recentRuns.push(empty);
     }
+    recentRunsElement.replaceChildren(...recentRuns);
+
+    const unlocked = new Set(snapshot.achievements);
+    const items = achievementDefinitions.map((achievement) => {
+      const item = document.createElement('li');
+      const isUnlocked = unlocked.has(achievement.id);
+      const achievementProgress = progress.getAchievementProgress(achievement);
+      item.dataset.achievement = achievement.id;
+      item.classList.toggle('locked', !isUnlocked);
+
+      const heading = document.createElement('div');
+      heading.className = 'achievement-name';
+      const title = document.createElement('span');
+      const value = document.createElement('span');
+      title.textContent = `${isUnlocked ? '◆' : '◇'} ${achievement.title}`;
+      if (achievement.id === 'dodge-1200') {
+        value.textContent = `${Math.floor(achievementProgress.current / 20)} / 60초`;
+      } else {
+        value.textContent = `${achievementProgress.current.toLocaleString('ko-KR')} / ${achievementProgress.target.toLocaleString('ko-KR')}`;
+      }
+      heading.append(title, value);
+
+      const description = document.createElement('p');
+      description.className = 'achievement-description';
+      description.textContent = isUnlocked ? '달성 완료!' : achievement.description;
+      const meter = document.createElement('progress');
+      meter.max = achievementProgress.target;
+      meter.value = achievementProgress.current;
+      meter.setAttribute('aria-label', `${achievement.title} 진행률 ${achievementProgress.percentage}%`);
+      item.append(heading, description, meter);
+      return item;
+    });
     achievementsElement.replaceChildren(...items);
   }
 
   function announceAchievements(achievements) {
-    if (!achievements.length) return;
-    announce(`새 업적: ${achievements.map(({ title }) => title).join(', ')}`);
+    if (!achievements.length) return false;
+    const titles = achievements.map(({ title }) => title).join(', ');
+    window.clearTimeout(achievementToastTimer);
+    achievementToast.hidden = true;
+    achievementToastTitle.textContent = titles;
+    void achievementToast.offsetWidth;
+    achievementToast.hidden = false;
+    achievementToastTimer = window.setTimeout(() => {
+      achievementToast.hidden = true;
+    }, 3600);
+    announce(`새 업적: ${titles}`);
+    return true;
   }
 
   function updatePauseButton(paused = false) {
@@ -349,15 +444,19 @@ function createArcadeApp() {
     updatePauseButton();
     input.setGameplayActive(true);
     touchControls.setEnabled(true);
+    let achievementUnlocked = false;
     if (recordStart) {
       const newAchievements = progress.recordStart(activeDefinition.id);
       renderProgress();
-      announceAchievements(newAchievements);
+      achievementUnlocked = announceAchievements(newAchievements);
+      if (achievementUnlocked) {
+        sound.play('success');
+      }
     }
     sound.play('start');
     loop.start();
     canvas.focus({ preventScroll: true });
-    announce(`${activeDefinition.title} 시작`);
+    if (!achievementUnlocked) announce(`${activeDefinition.title} 시작`);
   }
 
   function runCountdown(value = 3) {
@@ -586,6 +685,7 @@ function createArcadeApp() {
   return {
     destroy() {
       window.clearTimeout(playNowTimer);
+      window.clearTimeout(achievementToastTimer);
       clearCountdown();
       window.cancelAnimationFrame(resizeFrameId);
       setFocusMode(false, { restoreFocus: false });

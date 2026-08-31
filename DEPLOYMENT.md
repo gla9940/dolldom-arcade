@@ -17,7 +17,7 @@ npm run check:bundle
 
 ## 릴리스
 
-검증된 커밋에 `v1.2.0` 형식의 태그를 푸시하면 `.github/workflows/release.yml`이 GitHub Release와 자동 릴리스 노트를 만든다. 버전 변경 시 `package.json`, 화면 버전, 서비스 워커 캐시 이름, `CHANGELOG.md`를 함께 갱신한다.
+검증된 커밋에 `vX.Y.Z` 형식의 태그를 푸시하면 `.github/workflows/release.yml`이 GitHub Release와 자동 릴리스 노트를 만든다. 버전 변경 시 `package.json`, 화면 버전, 서비스 워커 캐시 이름, `CHANGELOG.md`를 함께 갱신한다.
 
 ## Codex Sites
 

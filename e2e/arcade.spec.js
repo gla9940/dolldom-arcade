@@ -27,6 +27,7 @@ test('메인 화면과 정적 리소스가 정상적으로 표시된다', async 
 });
 
 test('카운트다운, 일시정지, 재시작 흐름이 동작한다', async ({ page }) => {
+  await page.locator('[data-game="memory"]').click();
   await expect(page.locator('#quick-guide')).toBeVisible();
   await page.getByRole('button', { name: '게임 시작', exact: true }).click();
   await expect(page.locator('#overlay-title')).toHaveText('3');
@@ -39,7 +40,7 @@ test('카운트다운, 일시정지, 재시작 흐름이 동작한다', async ({
   await expect(page.locator('#overlay')).toHaveClass(/hidden/);
 
   await page.getByRole('button', { name: '다시 시작' }).click();
-  await expect(page.locator('#overlay-title')).toHaveText('네온 러너');
+  await expect(page.locator('#overlay-title')).toHaveText('글리치 메모리');
   await expect(page.locator('#live-score')).toHaveText('SCORE 0000');
 });
 
@@ -92,6 +93,9 @@ test('게임 종료 후 현재 점수와 최고 기록을 표시한다', async (
   await expect(page.locator('#overlay-score')).toHaveText(/\d{4,}/);
   await expect(page.locator('#overlay-best')).toHaveText(/\d{4,}/);
   await expect(page.getByRole('button', { name: '다시 플레이' })).toBeVisible();
+  await expect(page.locator('#achievement-toast')).toBeVisible();
+  await expect(page.locator('[data-game-stat="reaction"]')).toContainText('도전');
+  await expect(page.locator('#recent-runs')).toContainText('블록 캐처');
 });
 
 test.describe('모바일 화면', () => {
@@ -123,6 +127,7 @@ test.describe('모바일 화면', () => {
     await page.getByRole('button', { name: '게임 시작', exact: true }).click();
     await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
     await expect(page.locator('#touch-controls')).toBeVisible();
+    await expect(page.locator('#touch-controls')).toHaveAttribute('data-layout', 'dpad');
     await expect(page.getByRole('button', { name: '왼쪽 이동' })).toBeVisible();
     const targetSize = await page.getByRole('button', { name: '왼쪽 이동' }).evaluate((element) => {
       const rect = element.getBoundingClientRect();
@@ -139,5 +144,29 @@ test('PWA 매니페스트와 로컬 진행 기록 UI가 준비된다', async ({ 
   expect((await manifest.json()).start_url).toBe('./');
   await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', /manifest\.webmanifest/);
   await expect(page.locator('#total-plays')).toHaveText('0');
-  await expect(page.locator('#achievements')).toContainText('게임을 완료하면');
+  await expect(page.locator('#achievements [data-achievement]')).toHaveCount(6);
+  await expect(page.locator('[data-achievement="runner-1000"]')).toHaveClass(/locked/);
+  await expect(page.locator('[data-achievement="runner-1000"]')).toContainText('1,000점을 달성');
+  await expect(page.locator('#game-stat-list [data-game-stat]')).toHaveCount(4);
+  await expect(page.locator('#recent-runs')).toContainText('아직 완료한 게임이 없습니다');
+});
+
+test('이전 버전의 로컬 기록을 유지하며 상세 통계로 전환한다', async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem('dolldom-progress', JSON.stringify({
+      version: 1,
+      totalPlays: 3,
+      totalCompleted: 2,
+      totalScore: 1500,
+      achievements: ['first-play'],
+      games: {
+        runner: { plays: 3, completed: 2, totalScore: 1500, bestRun: 1100, clears: 0 },
+      },
+    }));
+  });
+  await page.reload();
+
+  await expect(page.locator('[data-game-stat="runner"]')).toContainText('750');
+  await expect(page.locator('[data-achievement="first-play"]')).not.toHaveClass(/locked/);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('dolldom-progress')).version)).toBe(2);
 });
