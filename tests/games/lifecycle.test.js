@@ -53,7 +53,7 @@ test('모든 게임 모듈은 독립 생명주기를 오류 없이 수행한다'
       context: createContextStub(),
       width: 720,
       height: 360,
-      input: {},
+      input: { isPressed() { return false; } },
       sound: { play() {}, tone() {} },
       onScore(score) {
         scores.push(score);
@@ -71,6 +71,27 @@ test('모든 게임 모듈은 독립 생명주기를 오류 없이 수행한다'
     assert.ok(scores.length > 0, `${definition.id} 게임이 점수를 알리지 않았습니다.`);
     assert.ok(scores.every(Number.isFinite), `${definition.id} 게임 점수가 유효하지 않습니다.`);
   });
+});
+
+test('deltaTime 기반 게임 속도는 60Hz와 144Hz에서 동일하다', () => {
+  function simulate(frameRate) {
+    const scores = [];
+    const game = games.find(({ id }) => id === 'dodge').create({
+      context: createContextStub(),
+      width: 720,
+      height: 360,
+      input: { isPressed() { return false; } },
+      sound: { play() {}, tone() {} },
+      onScore(score) { scores.push(score); },
+      onEnd() {},
+    });
+    game.init();
+    for (let frame = 0; frame < frameRate; frame += 1) game.update(1 / frameRate);
+    game.destroy();
+    return scores.at(-1);
+  }
+
+  assert.ok(Math.abs(simulate(60) - simulate(144)) < 0.001);
 });
 
 test('게임 레지스트리는 중복 id와 불완전한 정의를 거부한다', () => {

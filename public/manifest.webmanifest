@@ -1,0 +1,14 @@
+{
+  "name": "돌돔의 공간 — Neon Mini Arcade",
+  "short_name": "돌돔 아케이드",
+  "description": "설치 없이 즐기는 네 개의 네온 HTML5 미니게임",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07050c",
+  "theme_color": "#07050c",
+  "icons": [
+    { "src": "./favicon.png", "sizes": "256x256", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

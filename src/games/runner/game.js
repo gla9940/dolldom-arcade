@@ -14,6 +14,7 @@ export const runnerGame = {
   kicker: 'GAME 01 / EASY',
   copy: '스페이스바 또는 화면을 눌러 장애물을 뛰어넘으세요.',
   hint: 'SPACE / TAP — 점프',
+  touchControls: ['action'],
   card: {
     badge: 'EASY · RUN',
     icon: '🐟',

@@ -18,6 +18,32 @@ function write(key, value) {
   }
 }
 
+function remove(key) {
+  try {
+    window.localStorage.removeItem(`${STORAGE_PREFIX}-${key}`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function readJson(key, fallbackValue) {
+  try {
+    const value = JSON.parse(read(key, 'null'));
+    return value === null ? fallbackValue : value;
+  } catch {
+    return fallbackValue;
+  }
+}
+
+export function writeJson(key, value) {
+  try {
+    return write(key, JSON.stringify(value));
+  } catch {
+    return false;
+  }
+}
+
 export function getBestScore(gameId) {
   const score = Number(read(`best-${gameId}`, 0));
   return Number.isFinite(score) && score >= 0 ? Math.floor(score) : 0;
@@ -59,4 +85,9 @@ export function hasSeenGuide() {
 
 export function saveGuideSeen() {
   write('guide-seen', true);
+}
+
+export function resetGameRecords(gameIds) {
+  gameIds.forEach((gameId) => remove(`best-${gameId}`));
+  remove('progress');
 }

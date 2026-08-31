@@ -31,6 +31,7 @@ function isInteractiveElement(element) {
 export function createInputManager({ target = window, bindings = DEFAULT_BINDINGS } = {}) {
   const actionByCode = new Map();
   const pressedCodes = new Set();
+  const virtualSourcesByAction = new Map();
   const pressListeners = new Map();
   let gameplayActive = false;
 
@@ -40,6 +41,12 @@ export function createInputManager({ target = window, bindings = DEFAULT_BINDING
 
   function emitPress(action, event) {
     pressListeners.get(action)?.forEach((listener) => listener(event));
+  }
+
+  function isActionPressed(action) {
+    const keyboardPressed = bindings[action]?.some((code) => pressedCodes.has(code)) ?? false;
+    const virtualPressed = (virtualSourcesByAction.get(action)?.size ?? 0) > 0;
+    return keyboardPressed || virtualPressed;
   }
 
   function handleKeyDown(event) {
@@ -53,8 +60,9 @@ export function createInputManager({ target = window, bindings = DEFAULT_BINDING
     }
 
     if (pressedCodes.has(event.code)) return;
+    const wasPressed = isActionPressed(action);
     pressedCodes.add(event.code);
-    emitPress(action, event);
+    if (!wasPressed) emitPress(action, event);
   }
 
   function handleKeyUp(event) {
@@ -63,6 +71,7 @@ export function createInputManager({ target = window, bindings = DEFAULT_BINDING
 
   function handleBlur() {
     pressedCodes.clear();
+    virtualSourcesByAction.clear();
   }
 
   target.addEventListener('keydown', handleKeyDown);
@@ -78,12 +87,39 @@ export function createInputManager({ target = window, bindings = DEFAULT_BINDING
     },
 
     isPressed(action) {
-      return bindings[action]?.some((code) => pressedCodes.has(code)) ?? false;
+      return isActionPressed(action);
+    },
+
+    press(action, source = 'virtual', event = null) {
+      if (!gameplayActive) return false;
+
+      const sources = virtualSourcesByAction.get(action) ?? new Set();
+      const wasPressed = isActionPressed(action);
+      sources.add(source);
+      virtualSourcesByAction.set(action, sources);
+      if (!wasPressed) {
+        emitPress(action, event ?? { code: 'Virtual', source });
+      }
+      return true;
+    },
+
+    release(action, source = 'virtual') {
+      const sources = virtualSourcesByAction.get(action);
+      if (!sources) return;
+      sources.delete(source);
+      if (!sources.size) virtualSourcesByAction.delete(action);
+    },
+
+    releaseVirtualInputs() {
+      virtualSourcesByAction.clear();
     },
 
     setGameplayActive(active) {
       gameplayActive = Boolean(active);
-      if (!gameplayActive) pressedCodes.clear();
+      if (!gameplayActive) {
+        pressedCodes.clear();
+        virtualSourcesByAction.clear();
+      }
     },
 
     destroy() {
@@ -91,6 +127,7 @@ export function createInputManager({ target = window, bindings = DEFAULT_BINDING
       target.removeEventListener('keyup', handleKeyUp);
       target.removeEventListener('blur', handleBlur);
       pressedCodes.clear();
+      virtualSourcesByAction.clear();
       pressListeners.clear();
     },
   };

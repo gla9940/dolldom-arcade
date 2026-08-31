@@ -11,7 +11,7 @@ test('메인 화면과 정적 리소스가 정상적으로 표시된다', async 
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
   await expect(page).toHaveTitle(/돌돔의 공간/);
-  await expect(page.locator('[data-game]')).toHaveCount(3);
+  await expect(page.locator('[data-game]')).toHaveCount(4);
   await expect(page.getByRole('button', { name: '게임 크게 보기' })).toBeVisible();
 
   const assetState = await page.evaluate(() => ({
@@ -47,6 +47,7 @@ test('게임 선택, 음량 저장, 집중 모드가 동작한다', async ({ pag
   await page.locator('[data-game="memory"]').click();
   await expect(page.locator('#game-name')).toHaveText('GLITCH MEMORY');
   await expect(page.locator('[data-game="memory"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#game')).toHaveAttribute('aria-label', '글리치 메모리 게임 화면');
 
   await page.locator('#volume').fill('35');
   await page.locator('#volume').dispatchEvent('change');
@@ -56,8 +57,30 @@ test('게임 선택, 음량 저장, 집중 모드가 동작한다', async ({ pag
   await page.getByRole('button', { name: '게임 크게 보기' }).click();
   await expect(page.locator('body')).toHaveClass(/game-focus-mode/);
   await expect(page.locator('#arcade')).toHaveAttribute('inert', '');
+  await expect(page.locator('.progress-panel')).toHaveAttribute('inert', '');
   await page.locator('#game').press('Escape');
   await expect(page.locator('body')).not.toHaveClass(/game-focus-mode/);
+});
+
+test('반복적인 게임 전환 후에도 한 게임만 선택되고 오류가 발생하지 않는다', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  for (const gameId of ['runner', 'memory', 'reaction', 'dodge', 'runner', 'dodge']) {
+    await page.locator(`[data-game="${gameId}"]`).click();
+  }
+  await expect(page.locator('[data-game][aria-pressed="true"]')).toHaveCount(1);
+  await expect(page.locator('[data-game="dodge"]')).toHaveAttribute('aria-pressed', 'true');
+  expect(errors).toEqual([]);
+});
+
+test('동작 줄이기 설정에서도 핵심 UI가 즉시 표시된다', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.reload();
+  const transitionDuration = await page.locator('.game-overlay').evaluate(
+    (element) => getComputedStyle(element).transitionDuration,
+  );
+  expect(Number.parseFloat(transitionDuration)).toBeLessThanOrEqual(0.001);
+  await expect(page.getByRole('button', { name: '게임 시작', exact: true })).toBeVisible();
 });
 
 test('게임 종료 후 현재 점수와 최고 기록을 표시한다', async ({ page }) => {
@@ -94,4 +117,27 @@ test.describe('모바일 화면', () => {
     expect(focusLayout.tipVisible).toBe(true);
     expect(focusLayout.overflow).toBe(false);
   });
+
+  test('공통 터치 조작은 게임별로 필요한 버튼만 표시한다', async ({ page }) => {
+    await page.locator('[data-game="dodge"]').click();
+    await page.getByRole('button', { name: '게임 시작', exact: true }).click();
+    await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
+    await expect(page.locator('#touch-controls')).toBeVisible();
+    await expect(page.getByRole('button', { name: '왼쪽 이동' })).toBeVisible();
+    const targetSize = await page.getByRole('button', { name: '왼쪽 이동' }).evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return [rect.width, rect.height];
+    });
+    expect(targetSize[0]).toBeGreaterThanOrEqual(44);
+    expect(targetSize[1]).toBeGreaterThanOrEqual(44);
+  });
+});
+
+test('PWA 매니페스트와 로컬 진행 기록 UI가 준비된다', async ({ page, request }) => {
+  const manifest = await request.get('./manifest.webmanifest');
+  expect(manifest.ok()).toBe(true);
+  expect((await manifest.json()).start_url).toBe('./');
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', /manifest\.webmanifest/);
+  await expect(page.locator('#total-plays')).toHaveText('0');
+  await expect(page.locator('#achievements')).toContainText('게임을 완료하면');
 });

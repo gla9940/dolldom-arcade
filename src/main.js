@@ -1,7 +1,10 @@
 import { createCanvasSurface } from './core/canvas.js';
 import { createGameLoop } from './core/gameLoop.js';
 import { createInputManager } from './core/input.js';
+import { createProgressManager, achievementDefinitions } from './core/progress.js';
+import { createPwaManager } from './core/pwa.js';
 import { createSoundManager } from './core/sound.js';
+import { createTouchControls } from './core/touchControls.js';
 import { getBestScore, hasSeenGuide, saveBestScore, saveGuideSeen } from './core/storage.js';
 import { games, gamesById } from './games/index.js';
 
@@ -90,12 +93,20 @@ function createArcadeApp() {
   const focusModeButton = requiredElement('#focus-mode');
   const playNowButton = requiredElement('#play-now');
   const announcer = requiredElement('#announcer');
+  const touchControlsElement = requiredElement('#touch-controls');
+  const totalPlaysElement = requiredElement('#total-plays');
+  const totalScoreElement = requiredElement('#total-score');
+  const achievementCountElement = requiredElement('#achievement-count');
+  const achievementsElement = requiredElement('#achievements');
+  const resetRecordsButton = requiredElement('#reset-records');
   const gameCards = [...document.querySelectorAll('[data-game]')];
   const focusBackgroundElements = [
     document.querySelector('.topbar'),
     document.querySelector('.hero-copy'),
     document.querySelector('#arcade'),
     document.querySelector('.tips'),
+    document.querySelector('.updates'),
+    document.querySelector('.progress-panel'),
     document.querySelector('.footer'),
   ].filter(Boolean);
   const abortController = new AbortController();
@@ -106,7 +117,16 @@ function createArcadeApp() {
     height: GAME_HEIGHT,
   });
   const input = createInputManager();
+  const touchControls = createTouchControls(touchControlsElement, input);
   const sound = createSoundManager();
+  const progress = createProgressManager(games.map((game) => game.id));
+  const pwa = createPwaManager({
+    installButton: requiredElement('#install-app'),
+    statusElement: requiredElement('#system-status'),
+    notice: requiredElement('#app-notice'),
+    noticeCopy: requiredElement('#app-notice-copy'),
+    noticeAction: requiredElement('#app-notice-action'),
+  });
   const removeInputListeners = [];
 
   let activeDefinition = games[0];
@@ -147,6 +167,34 @@ function createArcadeApp() {
       const bestScore = getBestScore(element.dataset.best);
       element.textContent = `BEST ${String(bestScore).padStart(4, '0')}`;
     });
+  }
+
+  function renderProgress() {
+    const snapshot = progress.getSnapshot();
+    totalPlaysElement.textContent = snapshot.totalPlays.toLocaleString('ko-KR');
+    totalScoreElement.textContent = snapshot.totalScore.toLocaleString('ko-KR');
+    achievementCountElement.textContent = String(snapshot.achievements.length);
+    const unlocked = new Set(snapshot.achievements);
+    const items = achievementDefinitions
+      .filter((achievement) => unlocked.has(achievement.id))
+      .map((achievement) => {
+        const item = document.createElement('li');
+        item.title = achievement.description;
+        item.textContent = `◆ ${achievement.title}`;
+        return item;
+      });
+    if (!items.length) {
+      const empty = document.createElement('li');
+      empty.className = 'empty';
+      empty.textContent = '게임을 완료하면 업적이 열립니다.';
+      items.push(empty);
+    }
+    achievementsElement.replaceChildren(...items);
+  }
+
+  function announceAchievements(achievements) {
+    if (!achievements.length) return;
+    announce(`새 업적: ${achievements.map(({ title }) => title).join(', ')}`);
   }
 
   function updatePauseButton(paused = false) {
@@ -254,8 +302,11 @@ function createArcadeApp() {
     clearCountdown();
     loop.stop();
     input.setGameplayActive(false);
+    touchControls.setEnabled(false);
     const bestScore = saveBestScore(activeDefinition.id, score);
+    const newAchievements = progress.recordEnd(activeDefinition.id, score, message);
     refreshBestScores();
+    renderProgress();
     showOverlay({
       kicker: 'GAME OVER / RECORD SAVED',
       title: message,
@@ -265,7 +316,8 @@ function createArcadeApp() {
       bestScore,
     });
     sound.play(message.includes('복구') ? 'success' : 'gameOver');
-    announce(`게임 종료, 점수 ${Math.floor(score)}`);
+    announceAchievements(newAchievements);
+    if (!newAchievements.length) announce(`게임 종료, 점수 ${Math.floor(score)}`);
   }
 
   function createActiveGame() {
@@ -285,16 +337,23 @@ function createArcadeApp() {
     clearCountdown();
     loop.stop();
     input.setGameplayActive(false);
+    touchControls.setEnabled(false);
     setScore(0);
     activeGame.init();
     activeGame.render();
   }
 
-  function beginPlaying() {
+  function beginPlaying({ recordStart = false } = {}) {
     status = 'playing';
     overlay.classList.add('hidden');
     updatePauseButton();
     input.setGameplayActive(true);
+    touchControls.setEnabled(true);
+    if (recordStart) {
+      const newAchievements = progress.recordStart(activeDefinition.id);
+      renderProgress();
+      announceAchievements(newAchievements);
+    }
     sound.play('start');
     loop.start();
     canvas.focus({ preventScroll: true });
@@ -304,6 +363,7 @@ function createArcadeApp() {
   function runCountdown(value = 3) {
     status = 'countdown';
     input.setGameplayActive(true);
+    touchControls.setEnabled(false);
     showOverlay({
       kicker: 'GET READY',
       title: String(value),
@@ -316,7 +376,7 @@ function createArcadeApp() {
     countdownTimer = window.setTimeout(() => {
       if (status !== 'countdown') return;
       if (value > 1) runCountdown(value - 1);
-      else beginPlaying();
+      else beginPlaying({ recordStart: true });
     }, COUNTDOWN_INTERVAL_MS);
   }
 
@@ -341,6 +401,7 @@ function createArcadeApp() {
       clearCountdown();
       status = 'ready';
       input.setGameplayActive(false);
+      touchControls.setEnabled(false);
       showReady();
       announce('게임 시작 취소');
       return;
@@ -350,6 +411,7 @@ function createArcadeApp() {
       status = 'paused';
       loop.stop();
       input.setGameplayActive(false);
+      touchControls.setEnabled(false);
       showOverlay({
         kicker: 'PAUSED',
         title: '잠시 멈춤',
@@ -380,7 +442,9 @@ function createArcadeApp() {
     clearCountdown();
     loop.stop();
     input.setGameplayActive(false);
+    touchControls.setEnabled(false);
     activeDefinition = nextDefinition;
+    touchControls.setActions(activeDefinition.touchControls ?? []);
     status = 'ready';
     createActiveGame();
     resetActiveGame();
@@ -392,6 +456,7 @@ function createArcadeApp() {
     });
     gameNameElement.textContent = activeDefinition.name;
     hintElement.textContent = activeDefinition.hint;
+    canvas.setAttribute('aria-label', `${activeDefinition.title} 게임 화면`);
     showReady();
 
     if (scroll) consoleElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -472,6 +537,17 @@ function createArcadeApp() {
     },
     { signal },
   );
+  resetRecordsButton.addEventListener(
+    'click',
+    () => {
+      if (!window.confirm('모든 게임의 최고 기록, 통계, 업적을 초기화할까요?')) return;
+      progress.reset();
+      refreshBestScores();
+      renderProgress();
+      announce('모든 로컬 게임 기록을 초기화했습니다.');
+    },
+    { signal },
+  );
   playNowButton.addEventListener(
     'click',
     () => {
@@ -504,6 +580,7 @@ function createArcadeApp() {
   updateMuteButton();
   updateVolumeControl();
   refreshBestScores();
+  renderProgress();
   selectGame(games[0].id, { scroll: false });
 
   return {
@@ -514,9 +591,11 @@ function createArcadeApp() {
       setFocusMode(false, { restoreFocus: false });
       loop.stop();
       activeGame?.destroy?.();
+      touchControls.destroy();
       removeInputListeners.forEach((removeListener) => removeListener());
       input.destroy();
       sound.destroy();
+      pwa.destroy();
       abortController.abort();
     },
   };

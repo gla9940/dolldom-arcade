@@ -1,6 +1,6 @@
 {
   "name": "dolldom-arcade",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "node --test",
     "test:e2e": "playwright test",
+    "test:pwa": "playwright test --config playwright.pwa.config.js",
     "check:bundle": "node scripts/checkBundle.mjs"
   },
   "devDependencies": {

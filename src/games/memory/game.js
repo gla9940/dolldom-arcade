@@ -13,6 +13,7 @@ export const memoryGame = {
   kicker: 'GAME 02 / NORMAL',
   copy: '45초 안에 같은 네온 심볼 여섯 쌍을 모두 찾으세요.',
   hint: 'CLICK / TAP — 카드 뒤집기',
+  touchControls: [],
   card: {
     badge: 'NORMAL · MEMORY',
     icon: '🃏',

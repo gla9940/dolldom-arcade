@@ -8,7 +8,7 @@
     <meta name="keywords" content="미니게임, HTML5 게임, 브라우저 게임, 네온 아케이드" />
     <meta name="color-scheme" content="dark" />
     <meta property="og:title" content="돌돔의 공간 — Neon Mini Arcade" />
-    <meta property="og:description" content="설치 없이 즐기는 세 개의 네온 미니게임." />
+    <meta property="og:description" content="설치 없이 즐기는 네 개의 네온 미니게임." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://gla9940.github.io/dolldom-arcade/" />
     <meta property="og:image" content="%BASE_URL%og-social.jpg" />
@@ -16,11 +16,12 @@
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="돌돔의 공간 — Neon Mini Arcade" />
-    <meta name="twitter:description" content="설치 없이 즐기는 세 개의 네온 미니게임." />
+    <meta name="twitter:description" content="설치 없이 즐기는 네 개의 네온 미니게임." />
     <meta name="twitter:image" content="%BASE_URL%og-social.jpg" />
     <link rel="canonical" href="https://gla9940.github.io/dolldom-arcade/" />
     <link rel="icon" type="image/png" href="%BASE_URL%favicon.png" />
     <link rel="apple-touch-icon" href="%BASE_URL%favicon.png" />
+    <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" />
@@ -33,15 +34,18 @@
     <div class="wrap">
       <header class="topbar">
         <div class="brand"><span class="logo">뚊</span><span>돌돔의 공간</span></div>
-        <div class="status"><span class="dot"></span>SYSTEM ONLINE</div>
+        <div class="system-actions">
+          <button class="install-button" id="install-app" type="button" hidden>앱 설치</button>
+          <div class="status" id="system-status"><span class="dot"></span>SYSTEM ONLINE</div>
+        </div>
       </header>
 
       <main>
         <section class="hero">
           <div class="hero-copy">
-            <div class="eyebrow">NEON MINI ARCADE / 3 GAMES</div>
+            <div class="eyebrow">NEON MINI ARCADE / 4 GAMES</div>
             <h1>돌돔의<br /><span>공간</span></h1>
-            <p>점프하고, 기억하고, 터치하세요. 설치 없이 바로 즐기는 세 개의 짜릿한 미니게임.</p>
+            <p>점프하고, 기억하고, 터치하고, 피하세요. 설치 없이 바로 즐기는 네 개의 짜릿한 미니게임.</p>
             <a class="button primary" href="#console" id="play-now">바로 플레이 <span>↘</span></a>
           </div>
 
@@ -84,6 +88,7 @@
               <button class="tool" id="mute" type="button" aria-label="음소거" title="음소거">♪</button>
               <button class="tool" id="focus-mode" type="button" aria-label="게임 크게 보기" aria-pressed="false" title="게임 크게 보기">⛶</button>
             </div>
+            <div class="touch-controls" id="touch-controls" aria-label="모바일 게임 조작" hidden></div>
             <p class="focus-tip">기기를 가로로 돌리면 게임 화면을 더 크게 볼 수 있어요.</p>
             <div class="sr-only" id="announcer" aria-live="polite"></div>
           </section>
@@ -105,7 +110,7 @@
         <section class="tips" aria-label="게임 조작 안내">
           <div class="tip">
             <b>KEYBOARD READY</b>
-            <span>1·2·3으로 게임 선택, ESC/P로 일시정지, R로 재시작할 수 있어요.</span>
+            <span>1·2·3·4로 게임 선택, ESC/P로 일시정지, R로 재시작할 수 있어요.</span>
           </div>
           <div class="tip">
             <b>TOUCH FRIENDLY</b>
@@ -119,22 +124,43 @@
 
         <section class="updates" aria-labelledby="updates-title">
           <div>
-            <div class="eyebrow">SYSTEM UPDATE / v1.1.0</div>
+            <div class="eyebrow">SYSTEM UPDATE / v1.2.0</div>
             <h2 id="updates-title">이번 업데이트</h2>
           </div>
           <ul>
-            <li>게임 시작 카운트다운과 결과 기록 화면</li>
-            <li>모바일 집중 모드와 효과음 음량 조절</li>
-            <li>접근성·성능·자동 테스트 강화</li>
+            <li>신규 Canvas 게임 보이드 드리프터</li>
+            <li>공통 모바일 조작과 오프라인 설치</li>
+            <li>로컬 통계·업적과 테스트 강화</li>
           </ul>
+        </section>
+
+        <section class="progress-panel" aria-labelledby="progress-title">
+          <div class="progress-head">
+            <div>
+              <div class="eyebrow">LOCAL PLAYER DATA</div>
+              <h2 id="progress-title">나의 아케이드 기록</h2>
+            </div>
+            <button class="reset-records" id="reset-records" type="button">기록 초기화</button>
+          </div>
+          <dl class="progress-stats">
+            <div><dt>도전 횟수</dt><dd id="total-plays">0</dd></div>
+            <div><dt>누적 점수</dt><dd id="total-score">0</dd></div>
+            <div><dt>업적</dt><dd><span id="achievement-count">0</span> / 6</dd></div>
+          </dl>
+          <ul class="achievements" id="achievements" aria-label="획득한 업적"></ul>
         </section>
       </main>
 
       <footer class="footer">
-        <span>© 돌돔의 공간 · HTML5 MINI ARCADE · v1.1.0</span>
+        <span>© 돌돔의 공간 · HTML5 MINI ARCADE · v1.2.0</span>
         <span>NO FLASH. JUST PLAY.</span>
       </footer>
     </div>
+
+    <aside class="app-notice" id="app-notice" role="status" hidden>
+      <span id="app-notice-copy"></span>
+      <button id="app-notice-action" type="button" hidden></button>
+    </aside>
 
     <script type="module" src="./src/main.js"></script>
   </body>

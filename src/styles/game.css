@@ -28,6 +28,9 @@
 .volume-control output { min-width: 28px; color: var(--lime); font-variant-numeric: tabular-nums; }
 .volume-control input { width: 100%; min-width: 0; accent-color: var(--lime); cursor: pointer; }
 .focus-tip { display: none; margin: 8px 0 0; color: var(--muted); font-size: 11px; text-align: center; }
+.touch-controls { display: none; grid-template-columns: repeat(5, minmax(48px, 64px)); justify-content: center; gap: 9px; padding-top: 11px; }
+.touch-control { min-width: 48px; min-height: 48px; border: 1px solid #5d4780; border-radius: 12px; background: #171022; color: var(--lime); font: 800 22px inherit; touch-action: none; user-select: none; box-shadow: inset 0 0 16px #9b5cff12; }
+.touch-control:active { border-color: var(--lime); background: #251638; transform: scale(0.94); }
 
 body.game-focus-mode { overflow: hidden; }
 .console.focus-mode {
@@ -41,12 +44,13 @@ body.game-focus-mode { overflow: hidden; }
   border-radius: 0;
   padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   display: grid;
-  grid-template-rows: auto auto auto auto;
+  grid-template-rows: auto auto auto auto auto;
   align-content: center;
   background: radial-gradient(circle at 50% 10%, #241044, transparent 40%), #07050c;
 }
 .console.focus-mode .console-head,
 .console.focus-mode .toolbar,
+.console.focus-mode .touch-controls,
 .console.focus-mode .focus-tip { width: min(100%, 1100px); margin-inline: auto; }
 .console.focus-mode .screen { width: min(100%, 140vh); justify-self: center; }
 .console.focus-mode .toolbar { padding-top: 10px; }
@@ -59,6 +63,7 @@ body.game-focus-mode { overflow: hidden; }
 @media (max-width: 900px) { .console { max-width: 760px; } }
 
 @media (max-width: 700px) {
+  .touch-controls:not([hidden]) { display: grid; }
   .toolbar { grid-template-columns: minmax(0, 1fr) repeat(2, 42px) minmax(78px, 98px) repeat(2, 42px); gap: 6px; }
   .console { padding: 11px; border-radius: 16px; }
   .hint { font-size: 10px; }
@@ -66,7 +71,13 @@ body.game-focus-mode { overflow: hidden; }
   .volume-control span { display: none; }
 }
 
+@media (pointer: coarse) {
+  .touch-controls:not([hidden]) { display: grid; }
+}
+
 @media (max-width: 430px) {
+  .touch-controls { grid-template-columns: repeat(5, minmax(44px, 1fr)); gap: 6px; }
+  .touch-control { min-width: 44px; min-height: 48px; }
   .toolbar { grid-template-columns: minmax(100px, 1fr) repeat(4, 42px); }
   .toolbar .hint { grid-column: 1 / -1; }
   .toolbar #pause { grid-column: 2; }

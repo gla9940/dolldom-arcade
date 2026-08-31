@@ -15,6 +15,7 @@ export const reactionGame = {
   kicker: 'GAME 03 / HARD',
   copy: '블록이 바닥에 닿기 전에 클릭하세요. 다섯 개를 놓치면 종료됩니다.',
   hint: 'CLICK / TAP — 블록 잡기',
+  touchControls: [],
   card: {
     badge: 'HARD · REACTION',
     icon: '▣',
