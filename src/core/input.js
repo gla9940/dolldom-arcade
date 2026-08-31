@@ -23,7 +23,7 @@ function isInteractiveElement(element) {
 
   return Boolean(
     element.closest(
-      'input, textarea, select, button, a, [contenteditable]:not([contenteditable="false"]), [role="textbox"]',
+      'input, textarea, select, button, a, dialog[open], [contenteditable]:not([contenteditable="false"]), [role="textbox"]',
     ),
   );
 }

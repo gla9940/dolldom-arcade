@@ -14,6 +14,8 @@ export const runnerGame = {
   kicker: 'GAME 01 / EASY',
   copy: '스페이스바 또는 화면을 눌러 장애물을 뛰어넘으세요.',
   hint: 'SPACE / TAP — 점프',
+  accessibility: '화면 왼쪽의 물고기가 오른쪽에서 다가오는 장애물을 뛰어넘습니다. 스페이스 또는 Enter 키로 점프하고 Escape 키로 일시정지합니다.',
+  ariaKeyShortcuts: 'Space Enter ArrowUp Escape',
   touchControls: ['action'],
   card: {
     badge: 'EASY · RUN',

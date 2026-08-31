@@ -22,6 +22,7 @@ function createContextStub() {
     'save',
     'setLineDash',
     'stroke',
+    'strokeRect',
     'translate',
   ]);
 
@@ -56,6 +57,7 @@ test('모든 게임 모듈은 독립 생명주기를 오류 없이 수행한다'
       height: 360,
       input: { isPressed() { return false; } },
       sound: { play() {}, tone() {} },
+      settings: { get() { return undefined; } },
       onScore(score) {
         scores.push(score);
       },
@@ -83,6 +85,7 @@ test('deltaTime 기반 게임 속도는 60Hz와 144Hz에서 동일하다', () =>
       height: 360,
       input: { isPressed() { return false; } },
       sound: { play() {}, tone() {} },
+      settings: { get() { return undefined; } },
       onScore(score) { scores.push(score); },
       onEnd() {},
     });
@@ -112,4 +115,30 @@ test('보이드 드리프터는 안전한 초반 이후 세 단계로 난이도�
   assert.ok(opening.spawnInterval > middle.spawnInterval);
   assert.ok(middle.spawnInterval > late.spawnInterval);
   assert.ok(late.spawnInterval >= 0.36);
+});
+
+test('포인터 중심 게임도 공통 키보드 액션으로 플레이할 수 있다', () => {
+  for (const gameId of ['memory', 'reaction']) {
+    const sounds = [];
+    const definition = games.find((game) => game.id === gameId);
+    const game = definition.create({
+      context: createContextStub(),
+      width: 720,
+      height: 360,
+      sound: { play(name) { sounds.push(name); } },
+      onScore() {},
+      onEnd() {},
+    });
+
+    game.init();
+    game.update(gameId === 'reaction' ? 0.5 : 1 / 60);
+    if (gameId === 'memory') game.onAction('right');
+    game.onAction('action');
+    game.destroy();
+
+    assert.ok(
+      sounds.includes(gameId === 'memory' ? 'flip' : 'catch'),
+      `${gameId} 게임의 키보드 액션이 적용되지 않았습니다.`,
+    );
+  }
 });

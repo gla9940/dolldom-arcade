@@ -3,12 +3,17 @@
   "short_name": "돌돔 아케이드",
   "description": "설치 없이 즐기는 네 개의 네온 HTML5 미니게임",
   "lang": "ko",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "orientation": "any",
+  "categories": ["games", "entertainment"],
   "background_color": "#07050c",
   "theme_color": "#07050c",
   "icons": [
-    { "src": "./favicon.png", "sizes": "256x256", "type": "image/png", "purpose": "any maskable" }
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

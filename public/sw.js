@@ -1,6 +1,14 @@
-const CACHE_NAME = 'dolldom-arcade-v1.3.0';
+const CACHE_NAME = 'dolldom-arcade-v1.4.0';
 const APP_ROOT = new URL('./', self.location.href).pathname;
-const APP_SHELL = [APP_ROOT, `${APP_ROOT}manifest.webmanifest`, `${APP_ROOT}favicon.png`];
+const APP_SHELL = [
+  APP_ROOT,
+  `${APP_ROOT}manifest.webmanifest`,
+  `${APP_ROOT}favicon.png`,
+  `${APP_ROOT}icon-180.png`,
+  `${APP_ROOT}icon-192.png`,
+  `${APP_ROOT}icon-512.png`,
+  `${APP_ROOT}icon-maskable-512.png`,
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {

@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#07050c" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="돌돔 아케이드" />
     <meta name="description" content="달리고, 뒤집고, 터치하는 네온 HTML5 미니 아케이드." />
     <meta name="keywords" content="미니게임, HTML5 게임, 브라우저 게임, 네온 아케이드" />
     <meta name="color-scheme" content="dark" />
@@ -20,7 +24,7 @@
     <meta name="twitter:image" content="%BASE_URL%og-social.jpg" />
     <link rel="canonical" href="https://gla9940.github.io/dolldom-arcade/" />
     <link rel="icon" type="image/png" href="%BASE_URL%favicon.png" />
-    <link rel="apple-touch-icon" href="%BASE_URL%favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="%BASE_URL%icon-180.png" />
     <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -31,11 +35,13 @@
   </head>
 
   <body>
+    <a class="skip-link" href="#console">게임 영역으로 바로가기</a>
     <div class="wrap">
       <header class="topbar">
         <div class="brand"><span class="logo">뚊</span><span>돌돔의 공간</span></div>
         <div class="system-actions">
           <button class="install-button" id="install-app" type="button" hidden>앱 설치</button>
+          <button class="settings-button" id="open-settings" type="button" aria-haspopup="dialog" aria-controls="settings-dialog">설정</button>
           <div class="status" id="system-status"><span class="dot"></span>SYSTEM ONLINE</div>
         </div>
       </header>
@@ -49,13 +55,13 @@
             <a class="button primary" href="#console" id="play-now">바로 플레이 <span>↘</span></a>
           </div>
 
-          <section class="console" id="console" aria-label="미니게임 플레이 영역">
+          <section class="console" id="console" tabindex="-1" aria-label="미니게임 플레이 영역">
             <div class="console-head">
               <span class="game-name" id="game-name">NEON RUNNER</span>
               <span class="live-score" id="live-score">SCORE 0000</span>
             </div>
             <div class="screen" id="screen">
-              <canvas id="game" width="720" height="360" tabindex="0" aria-label="게임 화면" aria-describedby="hint">
+              <canvas id="game" width="720" height="360" tabindex="0" aria-label="게임 화면" aria-describedby="hint game-description">
                 이 게임은 Canvas를 지원하는 최신 브라우저에서 실행할 수 있습니다.
               </canvas>
               <div class="game-overlay" id="overlay">
@@ -90,6 +96,7 @@
             </div>
             <div class="touch-controls" id="touch-controls" aria-label="모바일 게임 조작" hidden></div>
             <p class="focus-tip">기기를 가로로 돌리면 게임 화면을 더 크게 볼 수 있어요.</p>
+            <p class="sr-only" id="game-description">네온 러너는 스페이스바 또는 화면 터치로 물고기를 점프시켜 장애물을 피하는 게임입니다.</p>
             <div class="sr-only" id="announcer" aria-live="polite"></div>
           </section>
         </section>
@@ -124,13 +131,13 @@
 
         <section class="updates" aria-labelledby="updates-title">
           <div>
-            <div class="eyebrow">SYSTEM UPDATE / v1.3.0</div>
+            <div class="eyebrow">SYSTEM UPDATE / v1.4.0</div>
             <h2 id="updates-title">이번 업데이트</h2>
           </div>
           <ul>
-            <li>보이드 드리프터 웨이브·피격 연출 개선</li>
-            <li>게임별 평균·최근 플레이 상세 기록</li>
-            <li>잠긴 업적 진행률과 달성 알림 추가</li>
+            <li>PWA 전용 아이콘과 iOS 설치 안내</li>
+            <li>고대비·파티클·터치 크기 공통 설정</li>
+            <li>Canvas 조작 설명과 키보드 접근성 강화</li>
           </ul>
         </section>
 
@@ -163,7 +170,7 @@
       </main>
 
       <footer class="footer">
-        <span>© 돌돔의 공간 · HTML5 MINI ARCADE · v1.3.0</span>
+        <span>© 돌돔의 공간 · HTML5 MINI ARCADE · v1.4.0</span>
         <span>NO FLASH. JUST PLAY.</span>
       </footer>
     </div>
@@ -176,6 +183,72 @@
       <span>ACHIEVEMENT UNLOCKED</span>
       <strong id="achievement-toast-title"></strong>
     </aside>
+
+    <dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
+      <form method="dialog">
+        <header class="dialog-head">
+          <div>
+            <span>ARCADE CONFIG</span>
+            <h2 id="settings-title">게임 설정</h2>
+          </div>
+          <button class="dialog-close" type="submit" aria-label="설정 닫기">×</button>
+        </header>
+        <div class="settings-list">
+          <label class="setting-row" for="setting-screen-shake">
+            <span><strong>화면 흔들림</strong><small>피격 충격 효과를 표시합니다.</small></span>
+            <input id="setting-screen-shake" name="screenShake" type="checkbox" />
+          </label>
+          <label class="setting-row" for="setting-particles">
+            <span><strong>파티클 효과</strong><small>기기 성능에 맞게 효과량을 조절합니다.</small></span>
+            <select id="setting-particles" name="particles">
+              <option value="full">전체</option>
+              <option value="reduced">간소화</option>
+              <option value="off">끄기</option>
+            </select>
+          </label>
+          <label class="setting-row" for="setting-high-contrast">
+            <span><strong>고대비 모드</strong><small>테두리와 글자 구분을 강화합니다.</small></span>
+            <input id="setting-high-contrast" name="highContrast" type="checkbox" />
+          </label>
+          <label class="setting-row" for="setting-touch-size">
+            <span><strong>터치 버튼 크기</strong><small>모바일 조작 버튼 크기를 선택합니다.</small></span>
+            <select id="setting-touch-size" name="touchSize">
+              <option value="normal">기본</option>
+              <option value="large">크게</option>
+            </select>
+          </label>
+          <label class="setting-row" for="setting-dodge-difficulty">
+            <span><strong>보이드 난이도</strong><small>다음 플레이부터 보호막과 속도에 적용됩니다.</small></span>
+            <select id="setting-dodge-difficulty" name="dodgeDifficulty">
+              <option value="normal">기본</option>
+              <option value="relaxed">편안하게</option>
+            </select>
+          </label>
+        </div>
+        <div class="dialog-actions">
+          <button class="reset-settings" id="reset-settings" type="button">기본값 복원</button>
+          <button class="button primary" type="submit">완료</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="install-dialog" id="ios-install-dialog" aria-labelledby="ios-install-title">
+      <form method="dialog">
+        <header class="dialog-head">
+          <div>
+            <span>INSTALL GUIDE</span>
+            <h2 id="ios-install-title">홈 화면에 설치</h2>
+          </div>
+          <button class="dialog-close" type="submit" aria-label="설치 안내 닫기">×</button>
+        </header>
+        <ol>
+          <li>Safari 하단의 <strong>공유</strong> 버튼을 누르세요.</li>
+          <li><strong>홈 화면에 추가</strong>를 선택하세요.</li>
+          <li>오른쪽 위의 <strong>추가</strong>를 누르면 완료됩니다.</li>
+        </ol>
+        <button class="button primary" type="submit">확인</button>
+      </form>
+    </dialog>
 
     <script type="module" src="./src/main.js"></script>
   </body>

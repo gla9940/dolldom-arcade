@@ -14,7 +14,9 @@ export const reactionGame = {
   title: '블록 캐처',
   kicker: 'GAME 03 / HARD',
   copy: '블록이 바닥에 닿기 전에 클릭하세요. 다섯 개를 놓치면 종료됩니다.',
-  hint: 'CLICK / TAP — 블록 잡기',
+  hint: 'SPACE / CLICK / TAP — 블록 잡기',
+  accessibility: '네온 블록이 화면 위에서 아래로 떨어집니다. 블록을 클릭하거나 스페이스 또는 Enter 키로 가장 낮은 블록을 잡습니다. 다섯 개를 놓치면 종료됩니다.',
+  ariaKeyShortcuts: 'Space Enter Escape',
   touchControls: [],
   card: {
     badge: 'HARD · REACTION',
@@ -23,7 +25,7 @@ export const reactionGame = {
     summary: '떨어지기 전에 터치하세요',
     difficulty: '어려움',
     estimatedTime: '1~2분',
-    controls: 'CLICK / TAP',
+    controls: 'SPACE / TAP',
   },
 
   create({ context, width, height, onScore, onEnd, sound }) {
@@ -86,6 +88,13 @@ export const reactionGame = {
       onScore(state.elapsedTime * 8 + state.hits * 100);
     }
 
+    function catchBlockAtIndex(index) {
+      state.blocks.splice(index, 1);
+      state.hits += 1;
+      onScore(state.elapsedTime * 8 + state.hits * 100);
+      sound.play('catch');
+    }
+
     function catchBlock(x, y) {
       for (let index = state.blocks.length - 1; index >= 0; index -= 1) {
         const block = state.blocks[index];
@@ -96,15 +105,29 @@ export const reactionGame = {
           y <= block.y + block.size + 8;
 
         if (hit) {
-          state.blocks.splice(index, 1);
-          state.hits += 1;
-          onScore(state.elapsedTime * 8 + state.hits * 100);
-          sound.play('catch');
+          catchBlockAtIndex(index);
           return;
         }
       }
 
       sound.play('wrong');
+    }
+
+    function handleAction(action) {
+      if (action !== 'action') return;
+      let lowestBlockIndex = -1;
+      for (let index = 0; index < state.blocks.length; index += 1) {
+        const block = state.blocks[index];
+        if (block.y + block.size < 0) continue;
+        if (lowestBlockIndex === -1 || block.y > state.blocks[lowestBlockIndex].y) {
+          lowestBlockIndex = index;
+        }
+      }
+      if (lowestBlockIndex === -1) {
+        sound.play('wrong');
+        return;
+      }
+      catchBlockAtIndex(lowestBlockIndex);
     }
 
     function render() {
@@ -139,6 +162,7 @@ export const reactionGame = {
       init,
       update,
       render,
+      onAction: handleAction,
       onPointerDown: catchBlock,
       destroy() {
         state.blocks.length = 0;

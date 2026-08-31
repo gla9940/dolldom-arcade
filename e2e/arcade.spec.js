@@ -49,6 +49,8 @@ test('게임 선택, 음량 저장, 집중 모드가 동작한다', async ({ pag
   await expect(page.locator('#game-name')).toHaveText('GLITCH MEMORY');
   await expect(page.locator('[data-game="memory"]')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('#game')).toHaveAttribute('aria-label', '글리치 메모리 게임 화면');
+  await expect(page.locator('#game')).toHaveAttribute('aria-keyshortcuts', /ArrowLeft/);
+  await expect(page.locator('#game-description')).toContainText('4열 3행');
 
   await page.locator('#volume').fill('35');
   await page.locator('#volume').dispatchEvent('change');
@@ -61,6 +63,33 @@ test('게임 선택, 음량 저장, 집중 모드가 동작한다', async ({ pag
   await expect(page.locator('.progress-panel')).toHaveAttribute('inert', '');
   await page.locator('#game').press('Escape');
   await expect(page.locator('body')).not.toHaveClass(/game-focus-mode/);
+});
+
+test('공통 게임 설정을 저장하고 기본값으로 복원한다', async ({ page }) => {
+  await page.getByRole('button', { name: '설정' }).click();
+  await expect(page.getByRole('dialog', { name: '게임 설정' })).toBeVisible();
+
+  await page.locator('#setting-high-contrast').check();
+  await page.locator('#setting-touch-size').selectOption('large');
+  await page.locator('#setting-particles').selectOption('off');
+  await page.locator('#setting-dodge-difficulty').selectOption('relaxed');
+  await expect(page.locator('body')).toHaveClass(/high-contrast/);
+  await expect(page.locator('body')).toHaveClass(/touch-large/);
+
+  const storedSettings = await page.evaluate(() => JSON.parse(localStorage.getItem('dolldom-settings')));
+  expect(storedSettings).toMatchObject({
+    highContrast: true,
+    touchSize: 'large',
+    particles: 'off',
+    dodgeDifficulty: 'relaxed',
+  });
+
+  await page.getByRole('button', { name: '기본값 복원' }).click();
+  await expect(page.locator('body')).not.toHaveClass(/high-contrast/);
+  await expect(page.locator('body')).not.toHaveClass(/touch-large/);
+  await expect(page.locator('#setting-particles')).toHaveValue('full');
+  await page.getByRole('button', { name: '완료' }).click();
+  await expect(page.getByRole('dialog', { name: '게임 설정' })).not.toBeVisible();
 });
 
 test('반복적인 게임 전환 후에도 한 게임만 선택되고 오류가 발생하지 않는다', async ({ page }) => {
@@ -141,7 +170,18 @@ test.describe('모바일 화면', () => {
 test('PWA 매니페스트와 로컬 진행 기록 UI가 준비된다', async ({ page, request }) => {
   const manifest = await request.get('./manifest.webmanifest');
   expect(manifest.ok()).toBe(true);
-  expect((await manifest.json()).start_url).toBe('./');
+  const manifestData = await manifest.json();
+  expect(manifestData.start_url).toBe('./');
+  expect(manifestData.icons).toEqual(expect.arrayContaining([
+    expect.objectContaining({ sizes: '192x192', purpose: 'any' }),
+    expect.objectContaining({ sizes: '512x512', purpose: 'any' }),
+    expect.objectContaining({ sizes: '512x512', purpose: 'maskable' }),
+  ]));
+  for (const icon of manifestData.icons) {
+    const iconResponse = await request.get(icon.src);
+    expect(iconResponse.ok()).toBe(true);
+    expect(iconResponse.headers()['content-type']).toContain('image/png');
+  }
   await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', /manifest\.webmanifest/);
   await expect(page.locator('#total-plays')).toHaveText('0');
   await expect(page.locator('#achievements [data-achievement]')).toHaveCount(6);

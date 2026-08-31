@@ -15,7 +15,8 @@ test('설치된 앱 셸은 네트워크가 끊겨도 다시 열린다', async ({
       requests.push(...cachedRequests);
     }
     return requests.some(({ url }) => url.endsWith('.js'))
-      && requests.some(({ url }) => url.endsWith('.css'));
+      && requests.some(({ url }) => url.endsWith('.css'))
+      && requests.some(({ url }) => url.endsWith('icon-maskable-512.png'));
   });
 
   await context.setOffline(true);

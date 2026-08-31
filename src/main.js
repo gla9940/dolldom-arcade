@@ -3,6 +3,7 @@ import { createGameLoop } from './core/gameLoop.js';
 import { createInputManager } from './core/input.js';
 import { createProgressManager, achievementDefinitions } from './core/progress.js';
 import { createPwaManager } from './core/pwa.js';
+import { createSettingsManager } from './core/settings.js';
 import { createSoundManager } from './core/sound.js';
 import { createTouchControls } from './core/touchControls.js';
 import { getBestScore, hasSeenGuide, saveBestScore, saveGuideSeen } from './core/storage.js';
@@ -104,6 +105,16 @@ function createArcadeApp() {
   const achievementToast = requiredElement('#achievement-toast');
   const achievementToastTitle = requiredElement('#achievement-toast-title');
   const resetRecordsButton = requiredElement('#reset-records');
+  const gameDescription = requiredElement('#game-description');
+  const settingsButton = requiredElement('#open-settings');
+  const settingsDialog = requiredElement('#settings-dialog');
+  const settingsForm = settingsDialog.querySelector('form');
+  const resetSettingsButton = requiredElement('#reset-settings');
+  const screenShakeInput = requiredElement('#setting-screen-shake');
+  const particlesInput = requiredElement('#setting-particles');
+  const highContrastInput = requiredElement('#setting-high-contrast');
+  const touchSizeInput = requiredElement('#setting-touch-size');
+  const dodgeDifficultyInput = requiredElement('#setting-dodge-difficulty');
   const gameCards = [...document.querySelectorAll('[data-game]')];
   const focusBackgroundElements = [
     document.querySelector('.topbar'),
@@ -125,8 +136,10 @@ function createArcadeApp() {
   const touchControls = createTouchControls(touchControlsElement, input);
   const sound = createSoundManager();
   const progress = createProgressManager(games.map((game) => game.id));
+  const settings = createSettingsManager();
   const pwa = createPwaManager({
     installButton: requiredElement('#install-app'),
+    iosInstallDialog: requiredElement('#ios-install-dialog'),
     statusElement: requiredElement('#system-status'),
     notice: requiredElement('#app-notice'),
     noticeCopy: requiredElement('#app-notice-copy'),
@@ -145,6 +158,26 @@ function createArcadeApp() {
   let achievementToastTimer = 0;
   let focusMode = false;
   let guideSeen = hasSeenGuide();
+
+  function applySettings(snapshot) {
+    document.body.classList.toggle('high-contrast', snapshot.highContrast);
+    document.body.classList.toggle('touch-large', snapshot.touchSize === 'large');
+  }
+
+  function syncSettingsForm(snapshot = settings.getSnapshot()) {
+    screenShakeInput.checked = snapshot.screenShake;
+    particlesInput.value = snapshot.particles;
+    highContrastInput.checked = snapshot.highContrast;
+    touchSizeInput.value = snapshot.touchSize;
+    dodgeDifficultyInput.value = snapshot.dodgeDifficulty;
+  }
+
+  const removeSettingsListener = settings.subscribe((snapshot) => {
+    applySettings(snapshot);
+    syncSettingsForm(snapshot);
+  });
+  applySettings(settings.getSnapshot());
+  syncSettingsForm();
 
   const loop = createGameLoop({
     update(deltaTime) {
@@ -423,6 +456,7 @@ function createArcadeApp() {
       height: surface.height,
       input,
       sound,
+      settings,
       onScore: setScore,
       onEnd: endGame,
     });
@@ -555,7 +589,9 @@ function createArcadeApp() {
     });
     gameNameElement.textContent = activeDefinition.name;
     hintElement.textContent = activeDefinition.hint;
+    gameDescription.textContent = activeDefinition.accessibility;
     canvas.setAttribute('aria-label', `${activeDefinition.title} 게임 화면`);
+    canvas.setAttribute('aria-keyshortcuts', activeDefinition.ariaKeyShortcuts);
     showReady();
 
     if (scroll) consoleElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -647,6 +683,34 @@ function createArcadeApp() {
     },
     { signal },
   );
+  settingsButton.addEventListener(
+    'click',
+    () => {
+      if (status === 'playing' || status === 'countdown') pauseGame();
+      syncSettingsForm();
+      settingsDialog.showModal();
+    },
+    { signal },
+  );
+  settingsForm.addEventListener(
+    'change',
+    (event) => {
+      const control = event.target;
+      if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
+      const value = control.type === 'checkbox' ? control.checked : control.value;
+      settings.update({ [control.name]: value });
+      announce('게임 설정을 저장했습니다.');
+    },
+    { signal },
+  );
+  resetSettingsButton.addEventListener(
+    'click',
+    () => {
+      settings.reset();
+      announce('게임 설정을 기본값으로 복원했습니다.');
+    },
+    { signal },
+  );
   playNowButton.addEventListener(
     'click',
     () => {
@@ -695,6 +759,8 @@ function createArcadeApp() {
       removeInputListeners.forEach((removeListener) => removeListener());
       input.destroy();
       sound.destroy();
+      removeSettingsListener();
+      settings.destroy();
       pwa.destroy();
       abortController.abort();
     },

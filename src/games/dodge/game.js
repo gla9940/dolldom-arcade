@@ -23,6 +23,8 @@ export const dodgeGame = {
   kicker: 'GAME 04 / HARD',
   copy: '방향키나 모바일 버튼으로 이동하며 네온 파편을 피하세요.',
   hint: 'ARROWS / WASD — 이동',
+  accessibility: '화면 중앙의 원형 플레이어를 방향키 또는 WASD로 이동해 사방에서 다가오는 네온 파편을 피합니다. 보호막이 모두 사라지면 종료됩니다.',
+  ariaKeyShortcuts: 'ArrowLeft ArrowRight ArrowUp ArrowDown Escape',
   touchControls: ['left', 'up', 'down', 'right'],
   card: {
     badge: 'HARD · DODGE',
@@ -34,10 +36,12 @@ export const dodgeGame = {
     controls: 'ARROWS / TOUCH',
   },
 
-  create({ context, width, height, input, onScore, onEnd, sound }) {
+  create({ context, width, height, input, onScore, onEnd, sound, settings }) {
     let state;
     const reducedMotion = typeof window !== 'undefined'
       && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const getSetting = (key, fallback) => settings?.get?.(key) ?? fallback;
+    const isRelaxed = () => getSetting('dodgeDifficulty', 'normal') === 'relaxed';
 
     function init() {
       state = {
@@ -46,7 +50,7 @@ export const dodgeGame = {
         particles: [],
         spawnDelay: SAFE_START_SECONDS,
         elapsedTime: 0,
-        shields: STARTING_SHIELDS,
+        shields: STARTING_SHIELDS + Number(isRelaxed()),
         invulnerableTime: 0,
         hitFlashTime: 0,
         shakeTime: 0,
@@ -81,7 +85,8 @@ export const dodgeGame = {
       const directionY = targetY - y;
       const distance = Math.hypot(directionX, directionY) || 1;
       const speedBoost = type === 'spike' ? 34 : 0;
-      const speed = Math.min(250, 105 + state.elapsedTime * 2.5 + speedBoost);
+      const speedScale = isRelaxed() ? 0.88 : 1;
+      const speed = Math.min(250, 105 + state.elapsedTime * 2.5 + speedBoost) * speedScale;
       state.hazards.push({
         type,
         x,
@@ -113,9 +118,12 @@ export const dodgeGame = {
     }
 
     function createHitParticles() {
-      if (reducedMotion) return;
-      for (let index = 0; index < 14; index += 1) {
-        const angle = (Math.PI * 2 * index) / 14 + Math.random() * 0.3;
+      const particleSetting = getSetting('particles', 'full');
+      const particleCount = reducedMotion || particleSetting === 'off'
+        ? 0
+        : particleSetting === 'reduced' ? 7 : 14;
+      for (let index = 0; index < particleCount; index += 1) {
+        const angle = (Math.PI * 2 * index) / particleCount + Math.random() * 0.3;
         const speed = 65 + Math.random() * 95;
         state.particles.push({
           x: state.player.x,
@@ -128,7 +136,8 @@ export const dodgeGame = {
     }
 
     function getSpawnInterval() {
-      return getDodgeDifficulty(state.elapsedTime).spawnInterval;
+      const interval = getDodgeDifficulty(state.elapsedTime).spawnInterval;
+      return isRelaxed() ? interval * 1.18 : interval;
     }
 
     function updatePlayer(deltaTime) {
@@ -202,7 +211,7 @@ export const dodgeGame = {
         state.shields -= 1;
         state.invulnerableTime = INVULNERABLE_SECONDS;
         state.hitFlashTime = 0.28;
-        state.shakeTime = reducedMotion ? 0 : 0.24;
+        state.shakeTime = reducedMotion || !getSetting('screenShake', true) ? 0 : 0.24;
         createHitParticles();
         sound.play('miss');
         if (state.shields <= 0) {

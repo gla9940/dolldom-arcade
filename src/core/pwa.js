@@ -1,8 +1,31 @@
-export function createPwaManager({ installButton, statusElement, notice, noticeCopy, noticeAction }) {
+function isAppleMobileDevice() {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function isStandalone() {
+  return window.matchMedia?.('(display-mode: standalone)').matches
+    || navigator.standalone === true;
+}
+
+export function createPwaManager({
+  installButton,
+  iosInstallDialog,
+  statusElement,
+  notice,
+  noticeCopy,
+  noticeAction,
+}) {
   const abortController = new AbortController();
   const { signal } = abortController;
   let deferredInstallPrompt = null;
   let reloadForUpdate = false;
+  const appleInstallAvailable = isAppleMobileDevice() && !isStandalone();
+
+  if (appleInstallAvailable) {
+    installButton.textContent = '설치 안내';
+    installButton.hidden = false;
+  }
 
   function setOnlineStatus() {
     const online = navigator.onLine;
@@ -35,7 +58,10 @@ export function createPwaManager({ installButton, statusElement, notice, noticeC
   installButton.addEventListener(
     'click',
     async () => {
-      if (!deferredInstallPrompt) return;
+      if (!deferredInstallPrompt) {
+        if (appleInstallAvailable) iosInstallDialog.showModal();
+        return;
+      }
       deferredInstallPrompt.prompt();
       await deferredInstallPrompt.userChoice;
       deferredInstallPrompt = null;

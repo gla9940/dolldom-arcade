@@ -31,6 +31,9 @@
 .touch-controls { display: none; grid-template-columns: repeat(5, minmax(48px, 64px)); justify-content: center; gap: 9px; padding-top: 11px; }
 .touch-control { min-width: 48px; min-height: 48px; border: 1px solid #5d4780; border-radius: 12px; background: #171022; color: var(--lime); font: 800 22px inherit; touch-action: none; user-select: none; box-shadow: inset 0 0 16px #9b5cff12; }
 .touch-control:active { border-color: var(--lime); background: #251638; transform: scale(0.94); }
+body.touch-large .touch-control { min-width: 60px; min-height: 60px; }
+body.touch-large .touch-controls[data-layout='dpad'] { grid-template-columns: repeat(3, minmax(60px, 76px)); grid-template-rows: repeat(2, 60px); }
+body.touch-large .touch-controls[data-layout='action'] { grid-template-columns: minmax(120px, 160px); }
 .touch-controls[data-layout='dpad'] { grid-template-columns: repeat(3, minmax(52px, 64px)); grid-template-rows: repeat(2, 48px); }
 .touch-controls[data-layout='dpad'] .touch-up { grid-column: 2; grid-row: 1; }
 .touch-controls[data-layout='dpad'] .touch-left { grid-column: 1; grid-row: 2; }

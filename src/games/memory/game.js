@@ -12,7 +12,9 @@ export const memoryGame = {
   title: '글리치 메모리',
   kicker: 'GAME 02 / NORMAL',
   copy: '45초 안에 같은 네온 심볼 여섯 쌍을 모두 찾으세요.',
-  hint: 'CLICK / TAP — 카드 뒤집기',
+  hint: 'ARROWS + SPACE / CLICK — 카드 선택',
+  accessibility: '4열 3행으로 놓인 열두 장의 카드에서 같은 심볼 여섯 쌍을 찾습니다. 방향키로 카드를 이동하고 스페이스 또는 Enter로 뒤집습니다.',
+  ariaKeyShortcuts: 'ArrowLeft ArrowRight ArrowUp ArrowDown Space Enter Escape',
   touchControls: [],
   card: {
     badge: 'NORMAL · MEMORY',
@@ -21,7 +23,7 @@ export const memoryGame = {
     summary: '짝을 찾아 기억을 깨우세요',
     difficulty: '보통',
     estimatedTime: '45초',
-    controls: 'CLICK / TAP',
+    controls: 'ARROWS / CLICK',
   },
 
   create({ context, width, height, onScore, onEnd, sound }) {
@@ -41,6 +43,7 @@ export const memoryGame = {
         finalScore: 0,
         timeRemaining: 45,
         matches: 0,
+        focusedCardIndex: 0,
       };
       onScore(0);
     }
@@ -71,14 +74,8 @@ export const memoryGame = {
       if (state.timeRemaining <= 0) onEnd('시간 초과!');
     }
 
-    function pickCard(x, y) {
+    function pickCardByIndex(cardIndex) {
       if (state.locked || state.finishDelay > 0) return;
-
-      const column = Math.floor((x - GRID_START_X) / (CARD_WIDTH + CARD_GAP));
-      const row = Math.floor((y - GRID_START_Y) / (CARD_HEIGHT + CARD_GAP));
-      if (column < 0 || column > 3 || row < 0 || row > 2) return;
-
-      const cardIndex = row * 4 + column;
       const card = state.deck[cardIndex];
       if (!card || card.open || card.matched) return;
 
@@ -112,6 +109,27 @@ export const memoryGame = {
       state.pendingPair = [firstCard, card];
     }
 
+    function pickCard(x, y) {
+      const column = Math.floor((x - GRID_START_X) / (CARD_WIDTH + CARD_GAP));
+      const row = Math.floor((y - GRID_START_Y) / (CARD_HEIGHT + CARD_GAP));
+      if (column < 0 || column > 3 || row < 0 || row > 2) return;
+      state.focusedCardIndex = row * 4 + column;
+      pickCardByIndex(state.focusedCardIndex);
+    }
+
+    function handleAction(action) {
+      if (action === 'action') {
+        pickCardByIndex(state.focusedCardIndex);
+        return;
+      }
+
+      const offsets = { left: -1, right: 1, up: -4, down: 4 };
+      if (!(action in offsets)) return;
+      state.focusedCardIndex = (state.focusedCardIndex + offsets[action] + state.deck.length)
+        % state.deck.length;
+      sound.play('select');
+    }
+
     function render() {
       drawBackdrop(context, width, height);
 
@@ -131,6 +149,12 @@ export const memoryGame = {
           card.matched ? '#233d24' : card.open ? '#2b1749' : '#0f0b18',
           card.matched ? palette.lime : '#4b3869',
         );
+
+        if (index === state.focusedCardIndex) {
+          context.strokeStyle = palette.lime;
+          context.lineWidth = 3;
+          context.strokeRect(x - 4, y - 4, CARD_WIDTH + 8, CARD_HEIGHT + 8);
+        }
 
         context.textAlign = 'center';
         context.textBaseline = 'middle';
@@ -160,6 +184,7 @@ export const memoryGame = {
       init,
       update,
       render,
+      onAction: handleAction,
       onPointerDown: pickCard,
       destroy() {
         state.pendingPair = null;

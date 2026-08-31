@@ -5,7 +5,16 @@ import { runnerGame } from './runner/game.js';
 
 function validateGameDefinition(game, index) {
   const label = game?.id || `index ${index}`;
-  const requiredTextFields = ['id', 'name', 'title', 'kicker', 'copy', 'hint'];
+  const requiredTextFields = [
+    'id',
+    'name',
+    'title',
+    'kicker',
+    'copy',
+    'hint',
+    'accessibility',
+    'ariaKeyShortcuts',
+  ];
   requiredTextFields.forEach((field) => {
     if (typeof game?.[field] !== 'string' || !game[field].trim()) {
       throw new TypeError(`게임 ${label}의 ${field} 값이 필요합니다.`);
