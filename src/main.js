@@ -1,6 +1,3 @@
-import './styles/global.css';
-import './styles/game.css';
-
 import { createCanvasSurface } from './core/canvas.js';
 import { createGameLoop } from './core/gameLoop.js';
 import { createInputManager } from './core/input.js';
