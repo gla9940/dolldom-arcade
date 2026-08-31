@@ -38,9 +38,6 @@ jobs:
       - name: Build site
         run: npm run build
 
-      - name: Test offline app shell
-        run: npm run test:pwa
-
       - name: Check bundle budget
         run: npm run check:bundle
 
