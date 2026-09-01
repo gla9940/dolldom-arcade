@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import { createGameRegistry, games } from '../../src/games/index.js';
 import { getDodgeDifficulty } from '../../src/games/dodge/game.js';
+import { createDiveBoard } from '../../src/games/sweeper/game.js';
 
 function createContextStub() {
   const gradient = { addColorStop() {} };
@@ -165,4 +166,57 @@ test('네온 슈터는 공통 논리 입력으로 이동하고 연속 발사한�
 
   assert.ok(sounds.includes('shoot'));
   assert.ok(scores.at(-1) > 0);
+});
+
+test('심해 로그 스위퍼 보드는 안전한 시작점과 유효한 위험 신호를 만든다', () => {
+  const board = createDiveBoard(() => 0.42);
+  const hazards = board.filter(({ kind }) => kind === 'hazard');
+  const logs = board.filter(({ kind }) => kind === 'log');
+
+  assert.equal(board.length, 60);
+  assert.equal(hazards.length, 9);
+  assert.equal(logs.length, 3);
+  assert.equal(board[0].kind, 'safe');
+  assert.equal(board[1].kind, 'safe');
+  assert.equal(board[10].kind, 'safe');
+  assert.equal(board[59].kind, 'exit');
+
+  board.forEach((cell, index) => {
+    const column = index % 10;
+    const row = Math.floor(index / 10);
+    const nearbyHazards = board.filter((candidate, candidateIndex) => {
+      const candidateColumn = candidateIndex % 10;
+      const candidateRow = Math.floor(candidateIndex / 10);
+      return candidateIndex !== index
+        && candidate.kind === 'hazard'
+        && Math.abs(candidateColumn - column) <= 1
+        && Math.abs(candidateRow - row) <= 1;
+    }).length;
+    assert.equal(cell.adjacentHazards, nearbyHazards);
+  });
+});
+
+test('심해 로그 스위퍼는 공통 방향·액션 입력과 deltaTime 산소를 처리한다', () => {
+  const sounds = [];
+  const scores = [];
+  const endings = [];
+  const game = games.find(({ id }) => id === 'sweeper').create({
+    context: createContextStub(),
+    width: 720,
+    height: 360,
+    sound: { play(name) { sounds.push(name); } },
+    onScore(score) { scores.push(score); },
+    onEnd(message) { endings.push(message); },
+  });
+
+  game.init();
+  game.onAction('right');
+  game.onAction('action');
+  game.update(76);
+  game.render();
+  game.destroy();
+
+  assert.ok(sounds.includes('select'));
+  assert.ok(scores.every(Number.isFinite));
+  assert.deepEqual(endings, ['산소가 모두 소진됐어요!']);
 });

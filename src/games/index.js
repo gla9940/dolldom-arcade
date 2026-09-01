@@ -3,6 +3,7 @@ import { memoryGame } from './memory/game.js';
 import { reactionGame } from './reaction/game.js';
 import { runnerGame } from './runner/game.js';
 import { shooterGame } from './shooter/game.js';
+import { sweeperGame } from './sweeper/game.js';
 
 function validateGameDefinition(game, index) {
   const label = game?.id || `index ${index}`;
@@ -53,6 +54,7 @@ export const games = createGameRegistry([
   reactionGame,
   dodgeGame,
   shooterGame,
+  sweeperGame,
 ]);
 
 export const gamesById = new Map(games.map((game) => [game.id, game]));
