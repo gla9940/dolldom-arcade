@@ -9,7 +9,7 @@ const BOARD_Y = 36;
 const HAZARD_COUNT = 9;
 const LOG_COUNT = 3;
 const STARTING_HULL = 3;
-const STARTING_OXYGEN = 75;
+const STARTING_OXYGEN = 120;
 const EXIT_INDEX = COLUMNS * ROWS - 1;
 
 function getNeighbors(index) {
