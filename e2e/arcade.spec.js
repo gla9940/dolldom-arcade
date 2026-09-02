@@ -194,9 +194,10 @@ test.describe('모바일 화면', () => {
     await page.locator('[data-game="sweeper"]').click();
     await page.getByRole('button', { name: '게임 시작', exact: true }).click();
     await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
-    await expect(page.locator('#touch-controls')).toHaveAttribute('data-layout', 'dpad-actions');
+    await expect(page.locator('#touch-controls')).toHaveAttribute('data-layout', 'dpad-guides');
     await expect(page.getByRole('button', { name: '액션' })).toBeVisible();
     await expect(page.getByRole('button', { name: '깃발 표시' })).toBeVisible();
+    await expect(page.getByRole('button', { name: '주변 범위 표시 켜기 또는 끄기' })).toBeVisible();
   });
 });
 
