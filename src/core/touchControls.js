@@ -5,6 +5,7 @@ const CONTROL_DEFINITIONS = [
   { action: 'right', label: '오른쪽 이동', symbol: '→' },
   { action: 'action', label: '액션', symbol: '●' },
   { action: 'mark', label: '깃발 표시', symbol: '⚑' },
+  { action: 'guide', label: '주변 범위 표시 켜기 또는 끄기', symbol: '◎' },
 ];
 
 export function createTouchControls(container, input) {
@@ -86,8 +87,10 @@ export function createTouchControls(container, input) {
       const hasDpad = directionalActions.every((action) => availableActions.has(action));
       const hasAction = availableActions.has('action');
       const hasMark = availableActions.has('mark');
-      container.dataset.layout = hasDpad && hasAction && hasMark
-        ? 'dpad-actions'
+      const hasGuide = availableActions.has('guide');
+      container.dataset.layout = hasDpad && hasAction && hasMark && hasGuide
+        ? 'dpad-guides'
+        : hasDpad && hasAction && hasMark ? 'dpad-actions'
         : hasDpad && hasAction ? 'dpad-action' : hasDpad ? 'dpad' : 'action';
       refreshVisibility();
     },

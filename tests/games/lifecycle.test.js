@@ -240,6 +240,8 @@ test('심해 로그 스위퍼는 공통 방향·액션 입력과 deltaTime 산�
   game.init();
   game.onAction('right');
   game.onAction('mark');
+  game.onAction('guide');
+  game.onAction('guide');
   game.onAction('action');
   game.update(91);
   game.render();

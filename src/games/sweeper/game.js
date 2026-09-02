@@ -94,10 +94,10 @@ export const sweeperGame = {
   title: '심해 로그 스위퍼',
   kicker: 'GAME 06 / EXPLORE',
   copy: '위험 신호를 읽고 데이터 로그 3개를 회수한 뒤 탈출 지점으로 이동하세요.',
-  hint: 'ARROWS — 탐색 · SPACE — 조사 · F / 우클릭 — 깃발',
-  accessibility: '10열 6행의 심해 탐사 구역입니다. 방향키로 조사 위치를 옮기고 스페이스 또는 Enter로 칸을 조사합니다. 선택한 칸의 주변 여덟 칸은 청록색 점선으로 표시됩니다. F키, 마우스 우클릭 또는 모바일 깃발 버튼으로 예상 위험 칸을 표시합니다. 숫자는 주변 여덟 칸의 위험 개수이며, 데이터 로그 세 개를 찾은 뒤 오른쪽 아래 탈출 지점을 조사하면 성공합니다.',
-  ariaKeyShortcuts: 'ArrowLeft ArrowRight ArrowUp ArrowDown Space Enter F Escape',
-  touchControls: ['left', 'up', 'down', 'right', 'action', 'mark'],
+  hint: 'ARROWS — 탐색 · SPACE — 조사 · F — 깃발 · G — 범위 표시',
+  accessibility: '10열 6행의 심해 탐사 구역입니다. 방향키로 조사 위치를 옮기고 스페이스 또는 Enter로 칸을 조사합니다. 선택한 칸의 주변 여덟 칸은 청록색 점선으로 은은하게 표시되며 G키 또는 모바일 범위 버튼으로 끌 수 있습니다. F키, 마우스 우클릭 또는 모바일 깃발 버튼으로 예상 위험 칸을 표시합니다. 숫자는 주변 여덟 칸의 위험 개수이며, 데이터 로그 세 개를 찾은 뒤 오른쪽 아래 탈출 지점을 조사하면 성공합니다.',
+  ariaKeyShortcuts: 'ArrowLeft ArrowRight ArrowUp ArrowDown Space Enter F G Escape',
+  touchControls: ['left', 'up', 'down', 'right', 'action', 'mark', 'guide'],
   defaultMode: 'normal',
   modes: [
     { id: 'practice', label: '연습 모드', description: '시간 무제한', record: false },
@@ -191,6 +191,7 @@ export const sweeperGame = {
         oxygen: STARTING_OXYGEN,
         logs: 0,
         flags: 0,
+        rangeGuide: true,
         practice: getMode?.() === 'practice',
         score: 0,
         finished: false,
@@ -227,6 +228,10 @@ export const sweeperGame = {
     function onAction(action) {
       if (action === 'action') probe(state.cursorIndex);
       else if (action === 'mark') toggleFlag(state.cursorIndex);
+      else if (action === 'guide') {
+        state.rangeGuide = !state.rangeGuide;
+        sound.play('select');
+      }
       else moveCursor(action);
     }
 
@@ -272,12 +277,12 @@ export const sweeperGame = {
       }
       drawRoundRect(context, x, y, CELL_SIZE, CELL_SIZE, 6, fill, stroke);
 
-      if (isNeighborCell(index, state.cursorIndex)) {
+      if (state.rangeGuide && isNeighborCell(index, state.cursorIndex)) {
         context.save();
-        context.fillStyle = state.practice ? '#69dce718' : '#69dce70c';
+        context.fillStyle = '#69dce70c';
         context.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
-        context.strokeStyle = state.practice ? '#69dce7bb' : '#69dce766';
-        context.lineWidth = state.practice ? 2 : 1;
+        context.strokeStyle = '#69dce766';
+        context.lineWidth = 1;
         context.setLineDash([3, 4]);
         context.strokeRect(x + 3, y + 3, CELL_SIZE - 6, CELL_SIZE - 6);
         context.restore();
@@ -370,7 +375,8 @@ export const sweeperGame = {
       context.font = '700 10px monospace';
       context.fillText(state.logs === LOG_COUNT ? 'EXIT ONLINE  ⇥' : 'FIND 3 LOGS', panelX, 296);
       context.fillStyle = palette.muted;
-      context.fillText('CYAN = 8-CELL RANGE', panelX, 318);
+      context.fillStyle = state.rangeGuide ? '#69dce7' : palette.muted;
+      context.fillText(`8-CELL RANGE  ${state.rangeGuide ? 'ON' : 'OFF'}  [G]`, panelX, 318);
     }
 
     function render() {

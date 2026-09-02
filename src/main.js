@@ -695,6 +695,9 @@ function createArcadeApp() {
       input.onPress('mark', () => {
         if (status === 'playing') activeGame.onAction?.('mark');
       }),
+      input.onPress('guide', () => {
+        if (status === 'playing') activeGame.onAction?.('guide');
+      }),
       input.onPress('pause', (event) => {
         if (event.code === 'Escape' && focusMode) setFocusMode(false);
         pauseGame();
