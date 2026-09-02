@@ -238,3 +238,23 @@ test('심해 로그 스위퍼는 공통 방향·액션 입력과 deltaTime 산�
   assert.ok(scores.every(Number.isFinite));
   assert.deepEqual(endings, ['산소가 모두 소진됐어요!']);
 });
+
+test('심해 로그 스위퍼 연습 모드는 시간이 지나도 산소로 종료되지 않는다', () => {
+  const endings = [];
+  const game = games.find(({ id }) => id === 'sweeper').create({
+    context: createContextStub(),
+    width: 720,
+    height: 360,
+    getMode() { return 'practice'; },
+    sound: { play() {} },
+    onScore() {},
+    onEnd(message) { endings.push(message); },
+  });
+
+  game.init();
+  game.update(600);
+  game.render();
+  game.destroy();
+
+  assert.deepEqual(endings, []);
+});

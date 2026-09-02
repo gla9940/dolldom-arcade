@@ -89,6 +89,11 @@ export const sweeperGame = {
   accessibility: '10열 6행의 심해 탐사 구역입니다. 방향키로 조사 위치를 옮기고 스페이스 또는 Enter로 칸을 조사합니다. F키, 마우스 우클릭 또는 모바일 깃발 버튼으로 예상 위험 칸을 표시합니다. 숫자는 주변 여덟 칸의 위험 개수이며, 데이터 로그 세 개를 찾은 뒤 오른쪽 아래 탈출 지점을 조사하면 성공합니다.',
   ariaKeyShortcuts: 'ArrowLeft ArrowRight ArrowUp ArrowDown Space Enter F Escape',
   touchControls: ['left', 'up', 'down', 'right', 'action', 'mark'],
+  defaultMode: 'normal',
+  modes: [
+    { id: 'practice', label: '연습 모드', description: '시간 무제한', record: false },
+    { id: 'normal', label: '일반 모드', description: '제한 시간 120초', record: true },
+  ],
   card: {
     badge: 'NEW · ROGUE PUZZLE',
     icon: '◉',
@@ -99,7 +104,7 @@ export const sweeperGame = {
     controls: 'SCAN / FLAG',
   },
 
-  create({ context, width, height, onScore, onEnd, sound }) {
+  create({ context, width, height, onScore, onEnd, sound, getMode }) {
     let state;
 
     function getScore() {
@@ -138,7 +143,9 @@ export const sweeperGame = {
           return;
         }
         state.finished = true;
-        state.score += Math.round(state.oxygen * 12 + state.hull * 180);
+        state.score += state.practice
+          ? state.hull * 180
+          : Math.round(state.oxygen * 12 + state.hull * 180);
         onScore(getScore());
         onEnd('심해 로그 복구 완료!', getScore());
         return;
@@ -175,6 +182,7 @@ export const sweeperGame = {
         oxygen: STARTING_OXYGEN,
         logs: 0,
         flags: 0,
+        practice: getMode?.() === 'practice',
         score: 0,
         finished: false,
       };
@@ -184,6 +192,7 @@ export const sweeperGame = {
 
     function update(deltaTime) {
       if (state.finished) return;
+      if (state.practice) return;
       state.oxygen = Math.max(0, state.oxygen - deltaTime);
       if (state.oxygen <= 0) {
         state.finished = true;
@@ -298,7 +307,7 @@ export const sweeperGame = {
       context.textBaseline = 'alphabetic';
       context.fillStyle = '#69dce7';
       context.font = '800 11px monospace';
-      context.fillText('ABYSS DIVE // 06', panelX, 49);
+      context.fillText(state.practice ? 'PRACTICE DIVE // 06' : 'ABYSS DIVE // 06', panelX, 49);
 
       context.fillStyle = palette.muted;
       context.font = '700 11px monospace';
@@ -326,11 +335,16 @@ export const sweeperGame = {
       context.fillText('OXYGEN', panelX, 210);
       context.fillStyle = '#12101c';
       context.fillRect(panelX, 222, 168, 12);
-      context.fillStyle = state.oxygen < 15 ? palette.danger : '#69dce7';
-      context.fillRect(panelX, 222, 168 * (state.oxygen / STARTING_OXYGEN), 12);
+      context.fillStyle = state.oxygen < 15 && !state.practice ? palette.danger : '#69dce7';
+      context.fillRect(
+        panelX,
+        222,
+        state.practice ? 168 : 168 * (state.oxygen / STARTING_OXYGEN),
+        12,
+      );
       context.fillStyle = palette.text;
       context.font = '700 12px monospace';
-      context.fillText(`${Math.ceil(state.oxygen)} SEC`, panelX, 254);
+      context.fillText(state.practice ? 'UNLIMITED  ∞' : `${Math.ceil(state.oxygen)} SEC`, panelX, 254);
 
       context.fillStyle = state.logs === LOG_COUNT ? palette.lime : palette.muted;
       context.font = '700 10px monospace';

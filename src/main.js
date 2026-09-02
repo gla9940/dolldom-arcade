@@ -81,6 +81,7 @@ function createArcadeApp() {
   const overlayScore = requiredElement('#overlay-score');
   const overlayBest = requiredElement('#overlay-best');
   const resultStats = requiredElement('#result-stats');
+  const gameModes = requiredElement('#game-modes');
   const quickGuide = requiredElement('#quick-guide');
   const overlayAction = requiredElement('#overlay-action');
   const scoreElement = requiredElement('#live-score');
@@ -149,6 +150,7 @@ function createArcadeApp() {
 
   let activeDefinition = games[0];
   let activeGame = null;
+  let activeMode = null;
   let status = 'ready';
   let score = 0;
   let displayedScore = null;
@@ -394,6 +396,7 @@ function createArcadeApp() {
     showResults = false,
     bestScore = 0,
     showGuide = false,
+    showModes = false,
     countdown = false,
   }) {
     overlayKicker.textContent = kicker;
@@ -402,6 +405,7 @@ function createArcadeApp() {
     overlayCopy.textContent = copy;
     resultStats.hidden = !showResults;
     quickGuide.hidden = !showGuide;
+    gameModes.hidden = !showModes || !activeDefinition.modes?.length;
     if (showResults) {
       overlayScore.textContent = String(Math.floor(score)).padStart(4, '0');
       overlayBest.textContent = String(bestScore).padStart(4, '0');
@@ -418,8 +422,47 @@ function createArcadeApp() {
       copy: activeDefinition.copy,
       action: '게임 시작',
       showGuide: !guideSeen,
+      showModes: true,
     });
     updatePauseButton();
+  }
+
+  function getActiveMode() {
+    return activeDefinition.modes?.find((mode) => mode.id === activeMode) ?? null;
+  }
+
+  function syncModeButtons() {
+    gameModes.querySelectorAll('[data-mode]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.mode === activeMode));
+    });
+  }
+
+  function selectMode(modeId) {
+    if (!activeDefinition.modes?.some((mode) => mode.id === modeId)) return;
+    activeMode = modeId;
+    syncModeButtons();
+    resetActiveGame();
+    showReady();
+    sound.play('select');
+    announce(`${getActiveMode()?.label ?? modeId} 선택`);
+  }
+
+  function renderModeButtons() {
+    const buttons = (activeDefinition.modes ?? []).map((mode) => {
+      const button = document.createElement('button');
+      button.className = 'game-mode';
+      button.type = 'button';
+      button.dataset.mode = mode.id;
+      button.setAttribute('aria-pressed', String(mode.id === activeMode));
+      const label = document.createElement('strong');
+      const description = document.createElement('span');
+      label.textContent = mode.label;
+      description.textContent = mode.description;
+      button.append(label, description);
+      button.addEventListener('click', () => selectMode(mode.id), { signal });
+      return button;
+    });
+    gameModes.replaceChildren(...buttons);
   }
 
   function endGame(message, finalScore = score) {
@@ -431,21 +474,32 @@ function createArcadeApp() {
     loop.stop();
     input.setGameplayActive(false);
     touchControls.setEnabled(false);
-    const bestScore = saveBestScore(activeDefinition.id, score);
-    const newAchievements = progress.recordEnd(activeDefinition.id, score, message);
-    refreshBestScores();
-    renderProgress();
+    const shouldRecord = getActiveMode()?.record !== false;
+    const bestScore = shouldRecord
+      ? saveBestScore(activeDefinition.id, score)
+      : getBestScore(activeDefinition.id);
+    const newAchievements = shouldRecord
+      ? progress.recordEnd(activeDefinition.id, score, message)
+      : [];
+    if (shouldRecord) {
+      refreshBestScores();
+      renderProgress();
+    }
     showOverlay({
-      kicker: 'GAME OVER / RECORD SAVED',
+      kicker: shouldRecord ? 'GAME OVER / RECORD SAVED' : 'PRACTICE COMPLETE / NOT RECORDED',
       title: message,
-      copy: '이번 점수를 저장했어요. 한 번 더 도전해볼까요?',
+      copy: shouldRecord
+        ? '이번 점수를 저장했어요. 한 번 더 도전해볼까요?'
+        : '연습 기록은 저장되지 않아요. 준비되면 일반 모드에 도전하세요.',
       action: '다시 플레이',
       showResults: true,
       bestScore,
     });
     sound.play(message.includes('복구') ? 'success' : 'gameOver');
     announceAchievements(newAchievements);
-    if (!newAchievements.length) announce(`게임 종료, 점수 ${Math.floor(score)}`);
+    if (!newAchievements.length) {
+      announce(`${shouldRecord ? '게임' : '연습'} 종료, 점수 ${Math.floor(score)}`);
+    }
   }
 
   function createActiveGame() {
@@ -457,6 +511,7 @@ function createArcadeApp() {
       input,
       sound,
       settings,
+      getMode: () => activeMode,
       onScore: setScore,
       onEnd: endGame,
     });
@@ -479,7 +534,7 @@ function createArcadeApp() {
     input.setGameplayActive(true);
     touchControls.setEnabled(true);
     let achievementUnlocked = false;
-    if (recordStart) {
+    if (recordStart && getActiveMode()?.record !== false) {
       const newAchievements = progress.recordStart(activeDefinition.id);
       renderProgress();
       achievementUnlocked = announceAchievements(newAchievements);
@@ -577,6 +632,10 @@ function createArcadeApp() {
     input.setGameplayActive(false);
     touchControls.setEnabled(false);
     activeDefinition = nextDefinition;
+    activeMode = activeDefinition.defaultMode
+      ?? activeDefinition.modes?.[0]?.id
+      ?? null;
+    renderModeButtons();
     touchControls.setActions(activeDefinition.touchControls ?? []);
     status = 'ready';
     createActiveGame();

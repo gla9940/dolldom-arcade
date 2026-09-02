@@ -127,6 +127,25 @@ test('게임 종료 후 현재 점수와 최고 기록을 표시한다', async (
   await expect(page.locator('#recent-runs')).toContainText('블록 캐처');
 });
 
+test('심해 로그 연습 모드는 시간 무제한이며 플레이 기록을 올리지 않는다', async ({ page }) => {
+  await page.locator('[data-game="sweeper"]').click();
+  const practiceMode = page.getByRole('button', { name: /연습 모드/ });
+  const normalMode = page.getByRole('button', { name: /일반 모드/ });
+  await expect(normalMode).toHaveAttribute('aria-pressed', 'true');
+  await practiceMode.click();
+  await expect(practiceMode).toHaveAttribute('aria-pressed', 'true');
+  await expect(normalMode).toHaveAttribute('aria-pressed', 'false');
+
+  await page.getByRole('button', { name: '게임 시작', exact: true }).click();
+  await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
+  await expect(page.locator('#total-plays')).toHaveText('0');
+  const sweeperPlays = await page.evaluate(() => {
+    const progress = JSON.parse(localStorage.getItem('dolldom-progress'));
+    return progress.games.sweeper.plays;
+  });
+  expect(sweeperPlays).toBe(0);
+});
+
 test.describe('모바일 화면', () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
