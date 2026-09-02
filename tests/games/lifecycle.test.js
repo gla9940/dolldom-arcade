@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { createGameRegistry, games } from '../../src/games/index.js';
 import { getDodgeDifficulty } from '../../src/games/dodge/game.js';
-import { createDiveBoard, toggleCellFlag } from '../../src/games/sweeper/game.js';
+import { createDiveBoard, isNeighborCell, toggleCellFlag } from '../../src/games/sweeper/game.js';
 
 function createContextStub() {
   const gradient = { addColorStop() {} };
@@ -194,6 +194,17 @@ test('심해 로그 스위퍼 보드는 안전한 시작점과 유효한 위험 
     }).length;
     assert.equal(cell.adjacentHazards, nearbyHazards);
   });
+});
+
+test('심해 로그 스위퍼는 선택 칸과 인접한 최대 8칸만 범위로 판정한다', () => {
+  const centerNeighbors = Array.from({ length: 60 }, (_value, index) => index)
+    .filter((index) => isNeighborCell(index, 22));
+  const cornerNeighbors = Array.from({ length: 60 }, (_value, index) => index)
+    .filter((index) => isNeighborCell(index, 0));
+
+  assert.deepEqual(centerNeighbors, [11, 12, 13, 21, 23, 31, 32, 33]);
+  assert.deepEqual(cornerNeighbors, [1, 10, 11]);
+  assert.equal(isNeighborCell(22, 22), false);
 });
 
 test('심해 로그 스위퍼 깃발은 숨은 칸에서만 제한 개수 안에 토글된다', () => {

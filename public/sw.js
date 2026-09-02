@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dolldom-arcade-v1.6.1';
+const CACHE_NAME = 'dolldom-arcade-v1.6.2';
 const APP_ROOT = new URL('./', self.location.href).pathname;
 const APP_SHELL = [
   APP_ROOT,
