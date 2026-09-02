@@ -9,7 +9,7 @@ const BOARD_Y = 36;
 const HAZARD_COUNT = 9;
 const LOG_COUNT = 3;
 const STARTING_HULL = 3;
-const STARTING_OXYGEN = 120;
+const STARTING_OXYGEN = 90;
 const EXIT_INDEX = COLUMNS * ROWS - 1;
 
 function getNeighbors(index) {
@@ -101,7 +101,7 @@ export const sweeperGame = {
   defaultMode: 'normal',
   modes: [
     { id: 'practice', label: '연습 모드', description: '시간 무제한', record: false },
-    { id: 'normal', label: '일반 모드', description: '제한 시간 120초', record: true },
+    { id: 'normal', label: '일반 모드', description: '제한 시간 90초', record: true },
   ],
   card: {
     badge: 'NEW · ROGUE PUZZLE',
