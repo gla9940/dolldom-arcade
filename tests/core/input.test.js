@@ -37,6 +37,7 @@ test('입력 시스템은 키를 액션으로 변환하고 반복 입력과 스�
   const input = createInputManager({ target });
   const presses = [];
   input.onPress('left', () => presses.push('left'));
+  input.onPress('mark', () => presses.push('mark'));
   input.setGameplayActive(true);
 
   let prevented = false;
@@ -58,6 +59,10 @@ test('입력 시스템은 키를 액션으로 변환하고 반복 입력과 스�
   target.dispatch('keyup', { code: 'ArrowLeft' });
   assert.equal(input.isPressed('left'), false);
 
+  target.dispatch('keydown', { code: 'KeyF', target: null, preventDefault() {} });
+  assert.deepEqual(presses, ['left', 'mark']);
+  target.dispatch('keyup', { code: 'KeyF' });
+
   target.dispatch('keydown', {
     code: 'ArrowLeft',
     target: new FakeElement(true),
@@ -65,7 +70,7 @@ test('입력 시스템은 키를 액션으로 변환하고 반복 입력과 스�
       throw new Error('입력 UI에서는 기본 동작을 막으면 안 됩니다.');
     },
   });
-  assert.deepEqual(presses, ['left']);
+  assert.deepEqual(presses, ['left', 'mark']);
 
   input.destroy();
   assert.equal(target.listeners.size, 0);

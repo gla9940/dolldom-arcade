@@ -602,14 +602,18 @@ function createArcadeApp() {
   function handlePointerDown(event) {
     if (event.isPrimary === false) return;
     event.preventDefault();
+    const secondaryAction = event.button === 2;
     if (status === 'ready' || status === 'gameover') {
-      startGame();
+      if (!secondaryAction) startGame();
       return;
     }
     if (status !== 'playing') return;
 
     const point = surface.toCanvasPoint(event);
-    activeGame.onPointerDown?.(point.x, point.y);
+    activeGame.onPointerDown?.(point.x, point.y, {
+      button: event.button,
+      pointerType: event.pointerType,
+    });
   }
 
   function bindInput() {
@@ -628,6 +632,9 @@ function createArcadeApp() {
         } else if (status === 'playing') {
           activeGame.onAction?.('action');
         }
+      }),
+      input.onPress('mark', () => {
+        if (status === 'playing') activeGame.onAction?.('mark');
       }),
       input.onPress('pause', (event) => {
         if (event.code === 'Escape' && focusMode) setFocusMode(false);

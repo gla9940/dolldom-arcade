@@ -11,6 +11,7 @@ const DEFAULT_BINDINGS = {
   up: ['ArrowUp', 'KeyW'],
   down: ['ArrowDown', 'KeyS'],
   action: ['Space', 'Enter'],
+  mark: ['KeyF'],
   pause: ['Escape', 'KeyP'],
   restart: ['KeyR'],
   ...GAME_SHORTCUT_BINDINGS,

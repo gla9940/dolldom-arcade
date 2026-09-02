@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import { createGameRegistry, games } from '../../src/games/index.js';
 import { getDodgeDifficulty } from '../../src/games/dodge/game.js';
-import { createDiveBoard } from '../../src/games/sweeper/game.js';
+import { createDiveBoard, toggleCellFlag } from '../../src/games/sweeper/game.js';
 
 function createContextStub() {
   const gradient = { addColorStop() {} };
@@ -196,6 +196,23 @@ test('심해 로그 스위퍼 보드는 안전한 시작점과 유효한 위험 
   });
 });
 
+test('심해 로그 스위퍼 깃발은 숨은 칸에서만 제한 개수 안에 토글된다', () => {
+  const hiddenCell = { kind: 'safe', revealed: false, flagged: false };
+  let flagCount = toggleCellFlag(hiddenCell, 0, 1);
+  assert.equal(flagCount, 1);
+  assert.equal(hiddenCell.flagged, true);
+
+  const anotherCell = { kind: 'hazard', revealed: false, flagged: false };
+  assert.equal(toggleCellFlag(anotherCell, flagCount, 1), 1);
+  assert.equal(anotherCell.flagged, false);
+
+  flagCount = toggleCellFlag(hiddenCell, flagCount, 1);
+  assert.equal(flagCount, 0);
+  assert.equal(hiddenCell.flagged, false);
+  assert.equal(toggleCellFlag({ kind: 'safe', revealed: true, flagged: false }, 0, 1), 0);
+  assert.equal(toggleCellFlag({ kind: 'exit', revealed: false, flagged: false }, 0, 1), 0);
+});
+
 test('심해 로그 스위퍼는 공통 방향·액션 입력과 deltaTime 산소를 처리한다', () => {
   const sounds = [];
   const scores = [];
@@ -211,6 +228,7 @@ test('심해 로그 스위퍼는 공통 방향·액션 입력과 deltaTime 산�
 
   game.init();
   game.onAction('right');
+  game.onAction('mark');
   game.onAction('action');
   game.update(76);
   game.render();
