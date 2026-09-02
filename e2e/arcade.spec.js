@@ -198,6 +198,9 @@ test.describe('모바일 화면', () => {
     await expect(page.getByRole('button', { name: '액션' })).toBeVisible();
     await expect(page.getByRole('button', { name: '깃발 표시' })).toBeVisible();
     await expect(page.getByRole('button', { name: '주변 범위 표시 켜기 또는 끄기' })).toBeVisible();
+    const actionButton = page.getByRole('button', { name: '액션' });
+    await expect(actionButton).toHaveCSS('height', '74px');
+    expect(await actionButton.evaluate((button) => getComputedStyle(button, '::after').content)).toBe('"조사"');
   });
 });
 
