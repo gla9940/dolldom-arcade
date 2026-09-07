@@ -569,8 +569,30 @@ function createArcadeApp() {
     const point = surface.toCanvasPoint(event);
     activeGame.onPointerDown?.(point.x, point.y, {
       button: event.button,
+      pointerId: event.pointerId,
       pointerType: event.pointerType,
     });
+    canvas.setPointerCapture?.(event.pointerId);
+  }
+
+  function handlePointerMove(event) {
+    if (status !== 'playing' || !canvas.hasPointerCapture?.(event.pointerId)) return;
+    event.preventDefault();
+    const point = surface.toCanvasPoint(event);
+    activeGame.onPointerMove?.(point.x, point.y, {
+      pointerId: event.pointerId,
+      pointerType: event.pointerType,
+    });
+  }
+
+  function handlePointerUp(event) {
+    if (status !== 'playing') return;
+    const point = surface.toCanvasPoint(event);
+    activeGame.onPointerUp?.(point.x, point.y, {
+      pointerId: event.pointerId,
+      pointerType: event.pointerType,
+    });
+    if (canvas.hasPointerCapture?.(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
   }
 
   function bindInput() {
@@ -609,6 +631,9 @@ function createArcadeApp() {
   }
 
   canvas.addEventListener('pointerdown', handlePointerDown, { signal });
+  canvas.addEventListener('pointermove', handlePointerMove, { signal });
+  canvas.addEventListener('pointerup', handlePointerUp, { signal });
+  canvas.addEventListener('pointercancel', handlePointerUp, { signal });
   canvas.addEventListener('contextmenu', (event) => event.preventDefault(), { signal });
   overlayAction.addEventListener('click', startGame, { signal });
   pauseButton.addEventListener('click', pauseGame, { signal });

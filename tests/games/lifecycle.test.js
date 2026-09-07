@@ -9,6 +9,7 @@ import {
   SWEEPER_DIFFICULTIES,
   toggleCellFlag,
 } from '../../src/games/sweeper/game.js';
+import { getMinimumMoves, GRIDLOCK_LEVELS } from '../../src/games/gridlock/game.js';
 
 function createContextStub() {
   const gradient = { addColorStop() {} };
@@ -222,4 +223,11 @@ test('심해 로그 스위퍼 연습 모드는 시간이 지나도 산소로 종
   game.destroy();
 
   assert.deepEqual(endings, []);
+});
+
+test('네온 블록 탈출의 모든 스테이지는 유효하고 목표 이동 수로 해결된다', () => {
+  assert.equal(GRIDLOCK_LEVELS.length, 8);
+  GRIDLOCK_LEVELS.forEach((level, index) => {
+    assert.equal(getMinimumMoves(level), level.par, `${index + 1} 스테이지의 PAR가 잘못되었습니다.`);
+  });
 });

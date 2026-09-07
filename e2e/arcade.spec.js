@@ -11,7 +11,7 @@ test('메인 화면과 정적 리소스가 정상적으로 표시된다', async 
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
   await expect(page).toHaveTitle(/돌돔의 공간/);
-  await expect(page.locator('[data-game]')).toHaveCount(2);
+  await expect(page.locator('[data-game]')).toHaveCount(3);
   await expect(page.getByRole('button', { name: '게임 크게 보기' })).toBeVisible();
 
   const assetState = await page.evaluate(() => ({
@@ -98,6 +98,31 @@ test('반복적인 게임 전환 후에도 한 게임만 선택되고 오류가 
   await expect(page.locator('[data-game][aria-pressed="true"]')).toHaveCount(1);
   await expect(page.locator('[data-game="sweeper"]')).toHaveAttribute('aria-pressed', 'true');
   expect(errors).toEqual([]);
+});
+
+test('네온 블록 탈출은 마우스 드래그로 첫 스테이지를 해결한다', async ({ page }) => {
+  await page.locator('[data-game="gridlock"]').click();
+  await expect(page.locator('#game-name')).toHaveText('NEON GRIDLOCK');
+  await page.getByRole('button', { name: '게임 시작', exact: true }).click();
+  await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
+
+  const canvas = page.locator('#game');
+  const box = await canvas.boundingBox();
+  const point = (x, y) => ({
+    x: box.x + (x / 720) * box.width,
+    y: box.y + (y / 360) * box.height,
+  });
+
+  await page.mouse.move(...Object.values(point(205, 103)));
+  await page.mouse.down();
+  await page.mouse.move(...Object.values(point(205, 53)), { steps: 4 });
+  await page.mouse.up();
+  await page.mouse.move(...Object.values(point(80, 153)));
+  await page.mouse.down();
+  await page.mouse.move(...Object.values(point(280, 153)), { steps: 8 });
+  await page.mouse.up();
+
+  await expect(page.locator('#live-score')).toHaveText('SCORE 0500');
 });
 
 test('동작 줄이기 설정에서도 핵심 UI가 즉시 표시된다', async ({ page }) => {
