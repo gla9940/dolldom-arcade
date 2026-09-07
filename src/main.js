@@ -294,6 +294,7 @@ function createArcadeApp() {
   }
 
   function showReady() {
+    renderDifficultyButtons();
     showOverlay({
       kicker: activeDefinition.kicker,
       title: activeDefinition.title,
@@ -351,25 +352,28 @@ function createArcadeApp() {
   }
 
   function selectDifficulty(difficultyId) {
-    if (!activeDefinition.difficulties?.some(({ id }) => id === difficultyId)) return;
+    const difficulty = activeDefinition.difficulties?.find(({ id }) => id === difficultyId);
+    if (!difficulty || difficulty.isAvailable?.() === false) return;
     activeDifficulty = difficultyId;
     syncDifficultyButtons();
     resetActiveGame();
     showReady();
     sound.play('select');
-    const difficulty = activeDefinition.difficulties.find(({ id }) => id === difficultyId);
     announce(`${difficulty?.label ?? difficultyId} 난이도 선택`);
   }
 
   function renderDifficultyButtons() {
+    gameDifficulties.classList.toggle('stage-picker', activeDefinition.id === 'tether');
     const buttons = (activeDefinition.difficulties ?? []).map((difficulty) => {
       const button = document.createElement('button');
       button.className = 'game-difficulty';
       button.type = 'button';
       button.dataset.difficulty = difficulty.id;
-      button.setAttribute('aria-pressed', String(difficulty.id === activeDifficulty));
-      button.textContent = difficulty.label;
-      button.title = difficulty.description;
+      const available = difficulty.isAvailable?.() !== false;
+      button.disabled = !available;
+      button.setAttribute('aria-pressed', String(available && difficulty.id === activeDifficulty));
+      button.textContent = available ? difficulty.label : `🔒 ${difficulty.label}`;
+      button.title = available ? difficulty.description : '이전 스테이지를 완료하면 열립니다.';
       button.addEventListener('click', () => selectDifficulty(difficulty.id), { signal });
       return button;
     });
@@ -390,6 +394,7 @@ function createArcadeApp() {
       ? saveBestScore(activeDefinition.id, score)
       : getBestScore(activeDefinition.id);
     if (shouldRecord) refreshBestScores();
+    renderDifficultyButtons();
     showOverlay({
       kicker: shouldRecord ? 'GAME OVER / RECORD SAVED' : 'PRACTICE COMPLETE / NOT RECORDED',
       title: message,
@@ -398,6 +403,7 @@ function createArcadeApp() {
         : '연습 기록은 저장되지 않아요. 준비되면 일반 모드에 도전하세요.',
       action: '다시 플레이',
       showResults: true,
+      showDifficulties: activeDefinition.showDifficultiesOnResults === true,
       bestScore,
     });
     sound.play(message.includes('복구') ? 'success' : 'gameOver');
@@ -526,6 +532,7 @@ function createArcadeApp() {
     input.setGameplayActive(false);
     touchControls.setEnabled(false);
     activeDefinition = nextDefinition;
+    overlay.classList.toggle('tether-overlay', gameId === 'tether');
     activeMode = activeDefinition.defaultMode
       ?? activeDefinition.modes?.[0]?.id
       ?? null;

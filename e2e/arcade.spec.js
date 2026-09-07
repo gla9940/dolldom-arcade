@@ -130,6 +130,8 @@ test('네온 테더는 Space 누르기와 놓기 입력으로 실행된다', asy
   page.on('pageerror', (error) => errors.push(error.message));
   await page.locator('[data-game="tether"]').click();
   await expect(page.locator('#game-name')).toHaveText('NEON TETHER');
+  await expect(page.locator('[data-difficulty="stage-1"]')).toBeEnabled();
+  await expect(page.locator('[data-difficulty="stage-2"]')).toBeDisabled();
   await page.getByRole('button', { name: '게임 시작', exact: true }).click();
   await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
   await page.keyboard.down('Space');
@@ -203,6 +205,13 @@ test.describe('모바일 화면', () => {
     expect(await actionButton.evaluate((button) => getComputedStyle(button, '::after').content)).toBe('"조사"');
 
     await page.locator('[data-game="tether"]').click();
+    await expect(page.locator('[data-difficulty^="stage-"]')).toHaveCount(12);
+    const stagePickerFits = await page.evaluate(() => {
+      const screen = document.querySelector('#screen').getBoundingClientRect();
+      const card = document.querySelector('.overlay-card').getBoundingClientRect();
+      return card.top >= screen.top && card.bottom <= screen.bottom;
+    });
+    expect(stagePickerFits).toBe(true);
     await page.getByRole('button', { name: '게임 시작', exact: true }).click();
     await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
     await expect(page.locator('#touch-controls')).toHaveAttribute('data-layout', 'action');

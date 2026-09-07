@@ -13,6 +13,7 @@ import { getMinimumMoves, GRIDLOCK_LEVELS } from '../../src/games/gridlock/game.
 import {
   findReachableAnchor,
   getBounceVelocityX,
+  isInsidePortal,
   TETHER_LEVELS,
 } from '../../src/games/tether/game.js';
 
@@ -248,6 +249,22 @@ test('네온 테더는 범위 안에서 가장 가까운 상단 앵커를 선택
     assert.equal(level.start.velocityX, 0);
     assert.equal(level.start.y, level.pads[0].y - 12);
   });
+});
+
+test('네온 테더는 가까운 후방보다 진행 방향의 앵커를 우선한다', () => {
+  const result = findReachableAnchor(
+    { x: 200, y: 220 },
+    [{ x: 175, y: 150 }, { x: 265, y: 100 }, { x: 500, y: 80 }],
+  );
+  assert.equal(result.index, 1);
+});
+
+test('네온 테더는 포털 타원 내부에 들어온 경우에만 클리어한다', () => {
+  const portal = { x: 684, y: 184 };
+  assert.equal(isInsidePortal({ x: 684, y: 184 }, portal), true);
+  assert.equal(isInsidePortal({ x: 684, y: 225 }, portal), true);
+  assert.equal(isInsidePortal({ x: 684, y: 250 }, portal), false);
+  assert.equal(isInsidePortal({ x: 720, y: 184 }, portal), false);
 });
 
 test('네온 테더는 공통 액션을 누르고 놓아 연결과 해제를 처리한다', () => {

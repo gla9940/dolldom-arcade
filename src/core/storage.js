@@ -90,3 +90,17 @@ export function saveGuideSeen() {
 export function clearProgressData() {
   remove('progress');
 }
+
+export function getUnlockedStage(gameId, stageCount) {
+  const count = Math.max(1, Math.floor(Number(stageCount) || 1));
+  const stage = Number(read(`unlocked-stage-${gameId}`, 1));
+  return Number.isFinite(stage) ? Math.min(count, Math.max(1, Math.floor(stage))) : 1;
+}
+
+export function saveUnlockedStage(gameId, stage, stageCount) {
+  const count = Math.max(1, Math.floor(Number(stageCount) || 1));
+  const nextStage = Number.isFinite(Number(stage)) ? Math.floor(Number(stage)) : 1;
+  const unlockedStage = Math.min(count, Math.max(getUnlockedStage(gameId, count), nextStage, 1));
+  write(`unlocked-stage-${gameId}`, unlockedStage);
+  return unlockedStage;
+}

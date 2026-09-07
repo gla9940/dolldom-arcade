@@ -5,11 +5,13 @@ import {
   clearProgressData,
   getBestScore,
   getMuted,
+  getUnlockedStage,
   getVolume,
   hasSeenGuide,
   saveBestScore,
   saveGuideSeen,
   saveMuted,
+  saveUnlockedStage,
   saveVolume,
 } from '../../src/core/storage.js';
 
@@ -82,4 +84,14 @@ test('사용하지 않는 플레이어 진행 데이터를 제거한다', () => 
   const values = useMemoryStorage({ 'dolldom-progress': '{"version":2}' });
   clearProgressData();
   assert.equal(values.has('dolldom-progress'), false);
+});
+
+test('게임 스테이지 해금은 범위를 지키며 이전 진행을 되돌리지 않는다', () => {
+  const values = useMemoryStorage();
+
+  assert.equal(getUnlockedStage('tether', 12), 1);
+  assert.equal(saveUnlockedStage('tether', 4, 12), 4);
+  assert.equal(saveUnlockedStage('tether', 2, 12), 4);
+  assert.equal(saveUnlockedStage('tether', 99, 12), 12);
+  assert.equal(values.get('dolldom-unlocked-stage-tether'), '12');
 });
