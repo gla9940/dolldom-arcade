@@ -11,7 +11,7 @@ test('메인 화면과 정적 리소스가 정상적으로 표시된다', async 
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
   await expect(page).toHaveTitle(/돌돔의 공간/);
-  await expect(page.locator('[data-game]')).toHaveCount(6);
+  await expect(page.locator('[data-game]')).toHaveCount(2);
   await expect(page.getByRole('button', { name: '게임 크게 보기' })).toBeVisible();
 
   const assetState = await page.evaluate(() => ({
@@ -60,7 +60,6 @@ test('게임 선택, 음량 저장, 집중 모드가 동작한다', async ({ pag
   await page.getByRole('button', { name: '게임 크게 보기' }).click();
   await expect(page.locator('body')).toHaveClass(/game-focus-mode/);
   await expect(page.locator('#arcade')).toHaveAttribute('inert', '');
-  await expect(page.locator('.progress-panel')).toHaveAttribute('inert', '');
   await page.locator('#game').press('Escape');
   await expect(page.locator('body')).not.toHaveClass(/game-focus-mode/);
 });
@@ -72,7 +71,6 @@ test('공통 게임 설정을 저장하고 기본값으로 복원한다', async 
   await page.locator('#setting-high-contrast').check();
   await page.locator('#setting-touch-size').selectOption('large');
   await page.locator('#setting-particles').selectOption('off');
-  await page.locator('#setting-dodge-difficulty').selectOption('relaxed');
   await expect(page.locator('body')).toHaveClass(/high-contrast/);
   await expect(page.locator('body')).toHaveClass(/touch-large/);
 
@@ -81,7 +79,6 @@ test('공통 게임 설정을 저장하고 기본값으로 복원한다', async 
     highContrast: true,
     touchSize: 'large',
     particles: 'off',
-    dodgeDifficulty: 'relaxed',
   });
 
   await page.getByRole('button', { name: '기본값 복원' }).click();
@@ -95,7 +92,7 @@ test('공통 게임 설정을 저장하고 기본값으로 복원한다', async 
 test('반복적인 게임 전환 후에도 한 게임만 선택되고 오류가 발생하지 않는다', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  for (const gameId of ['runner', 'memory', 'reaction', 'dodge', 'shooter', 'sweeper', 'runner', 'sweeper']) {
+  for (const gameId of ['memory', 'sweeper', 'memory', 'sweeper']) {
     await page.locator(`[data-game="${gameId}"]`).click();
   }
   await expect(page.locator('[data-game][aria-pressed="true"]')).toHaveCount(1);
@@ -113,21 +110,7 @@ test('동작 줄이기 설정에서도 핵심 UI가 즉시 표시된다', async 
   await expect(page.getByRole('button', { name: '게임 시작', exact: true })).toBeVisible();
 });
 
-test('게임 종료 후 현재 점수와 최고 기록을 표시한다', async ({ page }) => {
-  await page.locator('[data-game="reaction"]').click();
-  await page.getByRole('button', { name: '게임 시작', exact: true }).click();
-
-  await expect(page.locator('#overlay-title')).toHaveText('신호를 놓쳤어요!', { timeout: 18_000 });
-  await expect(page.locator('#result-stats')).toBeVisible();
-  await expect(page.locator('#overlay-score')).toHaveText(/\d{4,}/);
-  await expect(page.locator('#overlay-best')).toHaveText(/\d{4,}/);
-  await expect(page.getByRole('button', { name: '다시 플레이' })).toBeVisible();
-  await expect(page.locator('#achievement-toast')).toBeVisible();
-  await expect(page.locator('[data-game-stat="reaction"]')).toContainText('도전');
-  await expect(page.locator('#recent-runs')).toContainText('블록 캐처');
-});
-
-test('심해 로그 연습 모드는 시간 무제한이며 플레이 기록을 올리지 않는다', async ({ page }) => {
+test('심해 로그 연습 모드는 시간 무제한이며 진행 데이터를 만들지 않는다', async ({ page }) => {
   await page.locator('[data-game="sweeper"]').click();
   const practiceMode = page.getByRole('button', { name: /연습 모드/ });
   const normalMode = page.getByRole('button', { name: /일반 모드/ });
@@ -138,12 +121,7 @@ test('심해 로그 연습 모드는 시간 무제한이며 플레이 기록을 
 
   await page.getByRole('button', { name: '게임 시작', exact: true }).click();
   await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
-  await expect(page.locator('#total-plays')).toHaveText('0');
-  const sweeperPlays = await page.evaluate(() => {
-    const progress = JSON.parse(localStorage.getItem('dolldom-progress'));
-    return progress.games.sweeper.plays;
-  });
-  expect(sweeperPlays).toBe(0);
+  expect(await page.evaluate(() => localStorage.getItem('dolldom-progress'))).toBeNull();
 });
 
 test.describe('모바일 화면', () => {
@@ -171,26 +149,6 @@ test.describe('모바일 화면', () => {
   });
 
   test('공통 터치 조작은 게임별로 필요한 버튼만 표시한다', async ({ page }) => {
-    await page.locator('[data-game="dodge"]').click();
-    await page.getByRole('button', { name: '게임 시작', exact: true }).click();
-    await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
-    await expect(page.locator('#touch-controls')).toBeVisible();
-    await expect(page.locator('#touch-controls')).toHaveAttribute('data-layout', 'dpad');
-    await expect(page.getByRole('button', { name: '왼쪽 이동' })).toBeVisible();
-    const targetSize = await page.getByRole('button', { name: '왼쪽 이동' }).evaluate((element) => {
-      const rect = element.getBoundingClientRect();
-      return [rect.width, rect.height];
-    });
-    expect(targetSize[0]).toBeGreaterThanOrEqual(44);
-    expect(targetSize[1]).toBeGreaterThanOrEqual(44);
-
-    await page.locator('[data-game="shooter"]').click();
-    await page.getByRole('button', { name: '게임 시작', exact: true }).click();
-    await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
-    await expect(page.locator('#touch-controls')).toHaveAttribute('data-layout', 'dpad-action');
-    await expect(page.getByRole('button', { name: '액션' })).toBeVisible();
-    await expect(page.getByRole('button', { name: '깃발 표시' })).toBeHidden();
-
     await page.locator('[data-game="sweeper"]').click();
     await page.getByRole('button', { name: '게임 시작', exact: true }).click();
     await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
@@ -204,7 +162,7 @@ test.describe('모바일 화면', () => {
   });
 });
 
-test('PWA 매니페스트와 로컬 진행 기록 UI가 준비된다', async ({ page, request }) => {
+test('PWA 매니페스트와 아이콘이 준비된다', async ({ page, request }) => {
   const manifest = await request.get('./manifest.webmanifest');
   expect(manifest.ok()).toBe(true);
   const manifestData = await manifest.json();
@@ -220,30 +178,4 @@ test('PWA 매니페스트와 로컬 진행 기록 UI가 준비된다', async ({ 
     expect(iconResponse.headers()['content-type']).toContain('image/png');
   }
   await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', /manifest\.webmanifest/);
-  await expect(page.locator('#total-plays')).toHaveText('0');
-  await expect(page.locator('#achievements [data-achievement]')).toHaveCount(6);
-  await expect(page.locator('[data-achievement="runner-1000"]')).toHaveClass(/locked/);
-  await expect(page.locator('[data-achievement="runner-1000"]')).toContainText('1,000점을 달성');
-  await expect(page.locator('#game-stat-list [data-game-stat]')).toHaveCount(6);
-  await expect(page.locator('#recent-runs')).toContainText('아직 완료한 게임이 없습니다');
-});
-
-test('이전 버전의 로컬 기록을 유지하며 상세 통계로 전환한다', async ({ page }) => {
-  await page.evaluate(() => {
-    localStorage.setItem('dolldom-progress', JSON.stringify({
-      version: 1,
-      totalPlays: 3,
-      totalCompleted: 2,
-      totalScore: 1500,
-      achievements: ['first-play'],
-      games: {
-        runner: { plays: 3, completed: 2, totalScore: 1500, bestRun: 1100, clears: 0 },
-      },
-    }));
-  });
-  await page.reload();
-
-  await expect(page.locator('[data-game-stat="runner"]')).toContainText('750');
-  await expect(page.locator('[data-achievement="first-play"]')).not.toHaveClass(/locked/);
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('dolldom-progress')).version)).toBe(2);
 });

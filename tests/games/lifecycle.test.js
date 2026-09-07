@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createGameRegistry, games } from '../../src/games/index.js';
-import { getDodgeDifficulty } from '../../src/games/dodge/game.js';
 import { createDiveBoard, isNeighborCell, toggleCellFlag } from '../../src/games/sweeper/game.js';
 
 function createContextStub() {
@@ -77,28 +76,6 @@ test('모든 게임 모듈은 독립 생명주기를 오류 없이 수행한다'
   });
 });
 
-test('deltaTime 기반 게임 속도는 60Hz와 144Hz에서 동일하다', () => {
-  function simulate(frameRate) {
-    const scores = [];
-    const game = games.find(({ id }) => id === 'dodge').create({
-      context: createContextStub(),
-      width: 720,
-      height: 360,
-      input: { isPressed() { return false; } },
-      sound: { play() {}, tone() {} },
-      settings: { get() { return undefined; } },
-      onScore(score) { scores.push(score); },
-      onEnd() {},
-    });
-    game.init();
-    for (let frame = 0; frame < frameRate; frame += 1) game.update(1 / frameRate);
-    game.destroy();
-    return scores.at(-1);
-  }
-
-  assert.ok(Math.abs(simulate(60) - simulate(144)) < 0.001);
-});
-
 test('게임 레지스트리는 중복 id와 불완전한 정의를 거부한다', () => {
   assert.throws(() => createGameRegistry([games[0], games[0]]), /게임 id는 서로 달라야/);
   assert.throws(
@@ -107,65 +84,23 @@ test('게임 레지스트리는 중복 id와 불완전한 정의를 거부한다
   );
 });
 
-test('보이드 드리프터는 안전한 초반 이후 세 단계로 난이도가 상승한다', () => {
-  const opening = getDodgeDifficulty(0);
-  const middle = getDodgeDifficulty(16);
-  const late = getDodgeDifficulty(40);
-
-  assert.deepEqual([opening.wave, middle.wave, late.wave], [1, 2, 3]);
-  assert.ok(opening.spawnInterval > middle.spawnInterval);
-  assert.ok(middle.spawnInterval > late.spawnInterval);
-  assert.ok(late.spawnInterval >= 0.36);
-});
-
-test('포인터 중심 게임도 공통 키보드 액션으로 플레이할 수 있다', () => {
-  for (const gameId of ['memory', 'reaction']) {
-    const sounds = [];
-    const definition = games.find((game) => game.id === gameId);
-    const game = definition.create({
-      context: createContextStub(),
-      width: 720,
-      height: 360,
-      sound: { play(name) { sounds.push(name); } },
-      onScore() {},
-      onEnd() {},
-    });
-
-    game.init();
-    game.update(gameId === 'reaction' ? 0.5 : 1 / 60);
-    if (gameId === 'memory') game.onAction('right');
-    game.onAction('action');
-    game.destroy();
-
-    assert.ok(
-      sounds.includes(gameId === 'memory' ? 'flip' : 'catch'),
-      `${gameId} 게임의 키보드 액션이 적용되지 않았습니다.`,
-    );
-  }
-});
-
-test('네온 슈터는 공통 논리 입력으로 이동하고 연속 발사한다', () => {
-  const pressedActions = new Set(['right', 'action']);
+test('글리치 메모리는 공통 키보드 액션으로 플레이할 수 있다', () => {
   const sounds = [];
-  const scores = [];
-  const game = games.find(({ id }) => id === 'shooter').create({
+  const game = games.find(({ id }) => id === 'memory').create({
     context: createContextStub(),
     width: 720,
     height: 360,
-    input: { isPressed(action) { return pressedActions.has(action); } },
     sound: { play(name) { sounds.push(name); } },
-    settings: { get() { return undefined; } },
-    onScore(score) { scores.push(score); },
+    onScore() {},
     onEnd() {},
   });
 
   game.init();
-  game.update(0.2);
-  game.render();
+  game.onAction('right');
+  game.onAction('action');
   game.destroy();
 
-  assert.ok(sounds.includes('shoot'));
-  assert.ok(scores.at(-1) > 0);
+  assert.ok(sounds.includes('flip'));
 });
 
 test('심해 로그 스위퍼 보드는 안전한 시작점과 유효한 위험 신호를 만든다', () => {

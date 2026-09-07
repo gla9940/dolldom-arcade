@@ -29,7 +29,7 @@ test('설정 변경과 초기화는 구독자와 localStorage에 반영된다', 
   const changes = [];
   settings.subscribe((snapshot) => changes.push(snapshot));
 
-  settings.update({ particles: 'off', touchSize: 'large', dodgeDifficulty: 'relaxed' });
+  settings.update({ particles: 'off', touchSize: 'large' });
   assert.equal(settings.get('particles'), 'off');
   assert.equal(changes.length, 1);
   settings.reset();

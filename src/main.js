@@ -1,12 +1,17 @@
 import { createCanvasSurface } from './core/canvas.js';
 import { createGameLoop } from './core/gameLoop.js';
 import { createInputManager } from './core/input.js';
-import { createProgressManager, achievementDefinitions } from './core/progress.js';
 import { createPwaManager } from './core/pwa.js';
 import { createSettingsManager } from './core/settings.js';
 import { createSoundManager } from './core/sound.js';
 import { createTouchControls } from './core/touchControls.js';
-import { getBestScore, hasSeenGuide, saveBestScore, saveGuideSeen } from './core/storage.js';
+import {
+  clearProgressData,
+  getBestScore,
+  hasSeenGuide,
+  saveBestScore,
+  saveGuideSeen,
+} from './core/storage.js';
 import { games, gamesById } from './games/index.js';
 
 const GAME_WIDTH = 720;
@@ -70,6 +75,7 @@ function renderGameCards(container) {
 }
 
 function createArcadeApp() {
+  clearProgressData();
   const gameList = requiredElement('#game-list');
   renderGameCards(gameList);
   const canvas = requiredElement('#game');
@@ -96,16 +102,6 @@ function createArcadeApp() {
   const playNowButton = requiredElement('#play-now');
   const announcer = requiredElement('#announcer');
   const touchControlsElement = requiredElement('#touch-controls');
-  const totalPlaysElement = requiredElement('#total-plays');
-  const totalScoreElement = requiredElement('#total-score');
-  const achievementCountElement = requiredElement('#achievement-count');
-  const achievementTotalElement = requiredElement('#achievement-total');
-  const achievementsElement = requiredElement('#achievements');
-  const gameStatList = requiredElement('#game-stat-list');
-  const recentRunsElement = requiredElement('#recent-runs');
-  const achievementToast = requiredElement('#achievement-toast');
-  const achievementToastTitle = requiredElement('#achievement-toast-title');
-  const resetRecordsButton = requiredElement('#reset-records');
   const gameDescription = requiredElement('#game-description');
   const settingsButton = requiredElement('#open-settings');
   const settingsDialog = requiredElement('#settings-dialog');
@@ -115,7 +111,6 @@ function createArcadeApp() {
   const particlesInput = requiredElement('#setting-particles');
   const highContrastInput = requiredElement('#setting-high-contrast');
   const touchSizeInput = requiredElement('#setting-touch-size');
-  const dodgeDifficultyInput = requiredElement('#setting-dodge-difficulty');
   const gameCards = [...document.querySelectorAll('[data-game]')];
   const focusBackgroundElements = [
     document.querySelector('.topbar'),
@@ -123,7 +118,6 @@ function createArcadeApp() {
     document.querySelector('#arcade'),
     document.querySelector('.tips'),
     document.querySelector('.updates'),
-    document.querySelector('.progress-panel'),
     document.querySelector('.footer'),
   ].filter(Boolean);
   const abortController = new AbortController();
@@ -136,7 +130,6 @@ function createArcadeApp() {
   const input = createInputManager();
   const touchControls = createTouchControls(touchControlsElement, input);
   const sound = createSoundManager();
-  const progress = createProgressManager(games.map((game) => game.id));
   const settings = createSettingsManager();
   const pwa = createPwaManager({
     installButton: requiredElement('#install-app'),
@@ -157,7 +150,6 @@ function createArcadeApp() {
   let playNowTimer = 0;
   let countdownTimer = 0;
   let resizeFrameId = 0;
-  let achievementToastTimer = 0;
   let focusMode = false;
   let guideSeen = hasSeenGuide();
 
@@ -171,7 +163,6 @@ function createArcadeApp() {
     particlesInput.value = snapshot.particles;
     highContrastInput.checked = snapshot.highContrast;
     touchSizeInput.value = snapshot.touchSize;
-    dodgeDifficultyInput.value = snapshot.dodgeDifficulty;
   }
 
   const removeSettingsListener = settings.subscribe((snapshot) => {
@@ -208,123 +199,6 @@ function createArcadeApp() {
       const bestScore = getBestScore(element.dataset.best);
       element.textContent = `BEST ${String(bestScore).padStart(4, '0')}`;
     });
-  }
-
-  function renderProgress() {
-    const snapshot = progress.getSnapshot();
-    totalPlaysElement.textContent = snapshot.totalPlays.toLocaleString('ko-KR');
-    totalScoreElement.textContent = snapshot.totalScore.toLocaleString('ko-KR');
-    achievementCountElement.textContent = String(snapshot.achievements.length);
-    achievementTotalElement.textContent = String(achievementDefinitions.length);
-
-    const statCards = games.map((definition) => {
-      const stats = snapshot.games[definition.id];
-      const card = document.createElement('article');
-      card.className = 'game-stat';
-      card.dataset.gameStat = definition.id;
-      const title = document.createElement('strong');
-      title.textContent = definition.title;
-      const details = document.createElement('dl');
-      const average = stats.completed ? Math.floor(stats.totalScore / stats.completed) : 0;
-      const specialty = definition.id === 'memory'
-        ? ['복구', stats.clears.toLocaleString('ko-KR')]
-        : definition.id === 'dodge'
-          ? ['최장', `${Math.floor(stats.bestRun / 20)}초`]
-          : ['최고', stats.bestRun.toLocaleString('ko-KR')];
-      [
-        ['도전', stats.plays.toLocaleString('ko-KR')],
-        ['평균', average.toLocaleString('ko-KR')],
-        specialty,
-      ].forEach(([label, value]) => {
-        const group = document.createElement('div');
-        const term = document.createElement('dt');
-        const description = document.createElement('dd');
-        term.textContent = label;
-        description.textContent = value;
-        group.append(term, description);
-        details.append(group);
-      });
-      card.append(title, details);
-      return card;
-    });
-    gameStatList.replaceChildren(...statCards);
-
-    const recentRuns = snapshot.recentRuns.map((run) => {
-      const definition = gamesById.get(run.gameId);
-      const item = document.createElement('li');
-      const title = document.createElement('strong');
-      const score = document.createElement('span');
-      const playedAt = document.createElement('time');
-      title.textContent = definition?.title ?? run.gameId;
-      score.textContent = `${run.score.toLocaleString('ko-KR')}점`;
-      if (run.playedAt) {
-        playedAt.dateTime = run.playedAt;
-        playedAt.textContent = new Intl.DateTimeFormat('ko-KR', {
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        }).format(new Date(run.playedAt));
-      } else {
-        playedAt.textContent = '이전 기록';
-      }
-      item.append(title, score, playedAt);
-      return item;
-    });
-    if (!recentRuns.length) {
-      const empty = document.createElement('li');
-      empty.className = 'empty';
-      empty.textContent = '아직 완료한 게임이 없습니다.';
-      recentRuns.push(empty);
-    }
-    recentRunsElement.replaceChildren(...recentRuns);
-
-    const unlocked = new Set(snapshot.achievements);
-    const items = achievementDefinitions.map((achievement) => {
-      const item = document.createElement('li');
-      const isUnlocked = unlocked.has(achievement.id);
-      const achievementProgress = progress.getAchievementProgress(achievement);
-      item.dataset.achievement = achievement.id;
-      item.classList.toggle('locked', !isUnlocked);
-
-      const heading = document.createElement('div');
-      heading.className = 'achievement-name';
-      const title = document.createElement('span');
-      const value = document.createElement('span');
-      title.textContent = `${isUnlocked ? '◆' : '◇'} ${achievement.title}`;
-      if (achievement.id === 'dodge-1200') {
-        value.textContent = `${Math.floor(achievementProgress.current / 20)} / 60초`;
-      } else {
-        value.textContent = `${achievementProgress.current.toLocaleString('ko-KR')} / ${achievementProgress.target.toLocaleString('ko-KR')}`;
-      }
-      heading.append(title, value);
-
-      const description = document.createElement('p');
-      description.className = 'achievement-description';
-      description.textContent = isUnlocked ? '달성 완료!' : achievement.description;
-      const meter = document.createElement('progress');
-      meter.max = achievementProgress.target;
-      meter.value = achievementProgress.current;
-      meter.setAttribute('aria-label', `${achievement.title} 진행률 ${achievementProgress.percentage}%`);
-      item.append(heading, description, meter);
-      return item;
-    });
-    achievementsElement.replaceChildren(...items);
-  }
-
-  function announceAchievements(achievements) {
-    if (!achievements.length) return false;
-    const titles = achievements.map(({ title }) => title).join(', ');
-    window.clearTimeout(achievementToastTimer);
-    achievementToast.hidden = true;
-    achievementToastTitle.textContent = titles;
-    void achievementToast.offsetWidth;
-    achievementToast.hidden = false;
-    achievementToastTimer = window.setTimeout(() => {
-      achievementToast.hidden = true;
-    }, 3600);
-    announce(`새 업적: ${titles}`);
-    return true;
   }
 
   function updatePauseButton(paused = false) {
@@ -478,13 +352,7 @@ function createArcadeApp() {
     const bestScore = shouldRecord
       ? saveBestScore(activeDefinition.id, score)
       : getBestScore(activeDefinition.id);
-    const newAchievements = shouldRecord
-      ? progress.recordEnd(activeDefinition.id, score, message)
-      : [];
-    if (shouldRecord) {
-      refreshBestScores();
-      renderProgress();
-    }
+    if (shouldRecord) refreshBestScores();
     showOverlay({
       kicker: shouldRecord ? 'GAME OVER / RECORD SAVED' : 'PRACTICE COMPLETE / NOT RECORDED',
       title: message,
@@ -496,10 +364,7 @@ function createArcadeApp() {
       bestScore,
     });
     sound.play(message.includes('복구') ? 'success' : 'gameOver');
-    announceAchievements(newAchievements);
-    if (!newAchievements.length) {
-      announce(`${shouldRecord ? '게임' : '연습'} 종료, 점수 ${Math.floor(score)}`);
-    }
+    announce(`${shouldRecord ? '게임' : '연습'} 종료, 점수 ${Math.floor(score)}`);
   }
 
   function createActiveGame() {
@@ -527,25 +392,16 @@ function createArcadeApp() {
     activeGame.render();
   }
 
-  function beginPlaying({ recordStart = false } = {}) {
+  function beginPlaying() {
     status = 'playing';
     overlay.classList.add('hidden');
     updatePauseButton();
     input.setGameplayActive(true);
     touchControls.setEnabled(true);
-    let achievementUnlocked = false;
-    if (recordStart && getActiveMode()?.record !== false) {
-      const newAchievements = progress.recordStart(activeDefinition.id);
-      renderProgress();
-      achievementUnlocked = announceAchievements(newAchievements);
-      if (achievementUnlocked) {
-        sound.play('success');
-      }
-    }
     sound.play('start');
     loop.start();
     canvas.focus({ preventScroll: true });
-    if (!achievementUnlocked) announce(`${activeDefinition.title} 시작`);
+    announce(`${activeDefinition.title} 시작`);
   }
 
   function runCountdown(value = 3) {
@@ -564,7 +420,7 @@ function createArcadeApp() {
     countdownTimer = window.setTimeout(() => {
       if (status !== 'countdown') return;
       if (value > 1) runCountdown(value - 1);
-      else beginPlaying({ recordStart: true });
+      else beginPlaying();
     }, COUNTDOWN_INTERVAL_MS);
   }
 
@@ -741,17 +597,6 @@ function createArcadeApp() {
     },
     { signal },
   );
-  resetRecordsButton.addEventListener(
-    'click',
-    () => {
-      if (!window.confirm('모든 게임의 최고 기록, 통계, 업적을 초기화할까요?')) return;
-      progress.reset();
-      refreshBestScores();
-      renderProgress();
-      announce('모든 로컬 게임 기록을 초기화했습니다.');
-    },
-    { signal },
-  );
   settingsButton.addEventListener(
     'click',
     () => {
@@ -812,13 +657,11 @@ function createArcadeApp() {
   updateMuteButton();
   updateVolumeControl();
   refreshBestScores();
-  renderProgress();
   selectGame(games[0].id, { scroll: false });
 
   return {
     destroy() {
       window.clearTimeout(playNowTimer);
-      window.clearTimeout(achievementToastTimer);
       clearCountdown();
       window.cancelAnimationFrame(resizeFrameId);
       setFocusMode(false, { restoreFocus: false });

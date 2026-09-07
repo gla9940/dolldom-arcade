@@ -1,8 +1,4 @@
-import { dodgeGame } from './dodge/game.js';
 import { memoryGame } from './memory/game.js';
-import { reactionGame } from './reaction/game.js';
-import { runnerGame } from './runner/game.js';
-import { shooterGame } from './shooter/game.js';
 import { sweeperGame } from './sweeper/game.js';
 
 function validateGameDefinition(game, index) {
@@ -49,11 +45,7 @@ export function createGameRegistry(definitions) {
 }
 
 export const games = createGameRegistry([
-  runnerGame,
   memoryGame,
-  reactionGame,
-  dodgeGame,
-  shooterGame,
   sweeperGame,
 ]);
 

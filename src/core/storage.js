@@ -87,7 +87,6 @@ export function saveGuideSeen() {
   write('guide-seen', true);
 }
 
-export function resetGameRecords(gameIds) {
-  gameIds.forEach((gameId) => remove(`best-${gameId}`));
+export function clearProgressData() {
   remove('progress');
 }

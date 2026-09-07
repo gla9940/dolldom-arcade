@@ -48,8 +48,8 @@ button:focus-visible, a:focus-visible, canvas:focus-visible, input:focus-visible
 .status.offline { color: var(--danger); }
 .status.offline .dot { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
 .system-actions { display: flex; align-items: center; gap: 12px; }
-.install-button, .settings-button, .reset-records { min-height: 38px; padding: 8px 12px; border: 1px solid #51406d; border-radius: 8px; background: #151020; color: var(--text); font: 700 11px inherit; cursor: pointer; }
-.install-button:hover, .settings-button:hover, .reset-records:hover { border-color: var(--lime); color: var(--lime); }
+.install-button, .settings-button { min-height: 38px; padding: 8px 12px; border: 1px solid #51406d; border-radius: 8px; background: #151020; color: var(--text); font: 700 11px inherit; cursor: pointer; }
+.install-button:hover, .settings-button:hover { border-color: var(--lime); color: var(--lime); }
 .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 10px var(--lime); margin-right: 7px; animation: pulse 1.8s infinite; }
 .hero { padding: 64px 0 34px; display: grid; grid-template-columns: minmax(320px, 0.72fr) minmax(0, 1.28fr); gap: 40px; align-items: center; }
 .eyebrow { color: var(--lime); font-size: 12px; letter-spacing: 0.18em; font-weight: 800; }
@@ -63,7 +63,7 @@ button:focus-visible, a:focus-visible, canvas:focus-visible, input:focus-visible
 .section-head { display: flex; justify-content: space-between; align-items: end; margin: 44px 0 18px; }
 .section-head h2 { font-size: 27px; margin: 4px 0 0; }
 .section-head p { margin: 0; color: var(--muted); font-size: 13px; }
-.games { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding-bottom: 40px; }
+.games { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding-bottom: 40px; }
 .card { border: 1px solid var(--line); background: #0d0915dd; border-radius: 16px; padding: 14px 14px 34px; transition: 0.2s; cursor: pointer; position: relative; color: var(--text); text-align: left; font: inherit; }
 .card:hover, .card.active { border-color: var(--purple); transform: translateY(-5px); box-shadow: 0 12px 34px #0008; }
 .card.active::after { content: 'PLAYING'; position: absolute; right: 22px; top: 22px; color: var(--lime); font-size: 9px; font-weight: 800; letter-spacing: 0.12em; }
@@ -72,9 +72,6 @@ button:focus-visible, a:focus-visible, canvas:focus-visible, input:focus-visible
 .card:hover .thumb::after { transform: translateX(120%); }
 .thumb.one { background: linear-gradient(135deg, #271444, #0a332b); }
 .thumb.two { background: linear-gradient(135deg, #35102e, #16113c); }
-.thumb.three { background: linear-gradient(135deg, #18352d, #2b1240); }
-.thumb.four { background: linear-gradient(135deg, #31104d, #082f3c); }
-.thumb.five { background: linear-gradient(135deg, #102f3d, #42122f); }
 .thumb.six { background: linear-gradient(135deg, #071f31, #143d43); }
 .badge { position: absolute; left: 10px; top: 10px; background: #060509cc; border: 1px solid #ffffff25; border-radius: 20px; padding: 5px 8px; font-size: 10px; color: var(--lime); }
 .card h3 { margin: 13px 0 4px; }
@@ -91,42 +88,6 @@ button:focus-visible, a:focus-visible, canvas:focus-visible, input:focus-visible
 .updates h2 { margin: 5px 0 0; font-size: 24px; }
 .updates ul { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; list-style: none; padding: 0; margin: 0; }
 .updates li { min-height: 68px; display: flex; align-items: center; padding: 13px; border-radius: 10px; background: #ffffff07; color: var(--muted); font-size: 12px; line-height: 1.5; }
-.progress-panel { margin: -34px 0 64px; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: #0b0812dd; }
-.progress-head { display: flex; justify-content: space-between; gap: 20px; align-items: center; }
-.progress-head h2 { margin: 5px 0 0; font-size: 24px; }
-.progress-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0 12px; }
-.progress-stats div { padding: 16px; border-radius: 10px; background: #ffffff07; }
-.progress-stats dt { color: var(--muted); font-size: 11px; }
-.progress-stats dd { margin: 3px 0 0; color: var(--lime); font: 400 28px 'Black Han Sans', Impact, sans-serif; }
-.record-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(240px, 0.7fr); gap: 12px; margin-top: 18px; }
-.record-grid section { padding: 16px; border: 1px solid #ffffff10; border-radius: 12px; background: #ffffff04; }
-.record-grid h3, .achievement-title { margin: 0 0 12px; font-size: 14px; }
-.game-stat-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.game-stat { padding: 11px; border-radius: 9px; background: #08060dcc; }
-.game-stat strong { display: block; color: var(--text); font-size: 12px; }
-.game-stat dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0 0; }
-.game-stat dt { color: var(--muted); font-size: 9px; }
-.game-stat dd { margin: 2px 0 0; color: var(--lime); font-size: 12px; font-variant-numeric: tabular-nums; }
-.recent-runs { display: grid; gap: 7px; list-style: none; padding: 0; margin: 0; }
-.recent-runs li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; padding-bottom: 7px; border-bottom: 1px solid #ffffff0d; font-size: 10px; }
-.recent-runs li:last-child { padding-bottom: 0; border-bottom: 0; }
-.recent-runs strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.recent-runs time { grid-column: 1 / -1; color: var(--muted); }
-.recent-runs .empty { color: var(--muted); }
-.achievement-title { margin-top: 20px; }
-.achievements { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; list-style: none; padding: 0; margin: 0; }
-.achievements li { min-width: 0; padding: 11px; border: 1px solid #5b4679; border-radius: 9px; background: #ffffff04; color: var(--text); font-size: 11px; }
-.achievements li.locked { border-color: #ffffff14; color: var(--muted); }
-.achievement-name { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; }
-.achievement-name span:last-child { color: var(--lime); font-variant-numeric: tabular-nums; }
-.locked .achievement-name span:last-child { color: #756d81; }
-.achievement-description { min-height: 31px; margin: 6px 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
-.achievements progress { width: 100%; height: 5px; border: 0; accent-color: var(--lime); }
-.achievements progress::-webkit-progress-bar { border-radius: 5px; background: #ffffff0c; }
-.achievements progress::-webkit-progress-value { border-radius: 5px; background: var(--lime); }
-.achievement-toast { position: fixed; z-index: 210; left: 50%; top: max(18px, env(safe-area-inset-top)); transform: translate(-50%, -16px); display: grid; gap: 3px; min-width: min(320px, calc(100% - 32px)); padding: 13px 18px; border: 1px solid var(--lime); border-radius: 12px; background: #100b1df4; box-shadow: 0 12px 44px #000b, 0 0 24px #b9ff3833; opacity: 0; animation: achievement-in 3.6s ease both; text-align: center; }
-.achievement-toast span { color: var(--lime); font-size: 9px; font-weight: 800; letter-spacing: 0.14em; }
-.achievement-toast strong { font-size: 15px; }
 .app-notice { position: fixed; z-index: 200; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); max-width: min(420px, calc(100% - 32px)); display: flex; align-items: center; gap: 12px; padding: 13px 15px; border: 1px solid var(--purple); border-radius: 12px; background: #100b1df2; box-shadow: 0 12px 40px #000a; color: var(--text); font-size: 12px; }
 .app-notice button { border: 0; border-radius: 7px; padding: 8px 10px; background: var(--lime); color: #07050c; font: 700 11px inherit; cursor: pointer; white-space: nowrap; }
 .settings-dialog, .install-dialog { width: min(520px, calc(100% - 28px)); max-height: calc(100dvh - 28px); padding: 0; border: 1px solid #5b4679; border-radius: 16px; background: #100b1df5; color: var(--text); box-shadow: 0 24px 90px #000d, 0 0 40px #9b5cff22; }
@@ -155,17 +116,11 @@ body.high-contrast { --muted: #ddd7e8; --line: #765d9c; }
 body.high-contrast .card,
 body.high-contrast .console,
 body.high-contrast .tips,
-body.high-contrast .updates,
-body.high-contrast .progress-panel { border-color: #9d7dcc; }
+body.high-contrast .updates { border-color: #9d7dcc; }
 body.high-contrast .game-facts span,
 body.high-contrast .shortcut { color: #f6f2ff; }
 
 @keyframes pulse { 50% { opacity: 0.35; transform: scale(0.8); } }
-@keyframes achievement-in {
-  0% { opacity: 0; transform: translate(-50%, -16px); }
-  12%, 88% { opacity: 1; transform: translate(-50%, 0); }
-  100% { opacity: 0; transform: translate(-50%, -10px); }
-}
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; padding-top: 44px; gap: 30px; }
@@ -174,10 +129,6 @@ body.high-contrast .shortcut { color: #f6f2ff; }
   .hero-copy .button { grid-column: 2; grid-row: 2 / 4; margin-bottom: 26px; }
   .hero h1 { font-size: 72px; }
   .games { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 1180px) and (min-width: 901px) {
-  .games { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 700px) {
@@ -193,12 +144,6 @@ body.high-contrast .shortcut { color: #f6f2ff; }
   .updates { grid-template-columns: 1fr; margin-top: -28px; }
   .updates ul { grid-template-columns: 1fr; }
   .updates li { min-height: auto; }
-  .progress-panel { margin-top: -28px; padding: 18px; }
-  .progress-stats { grid-template-columns: 1fr; }
-  .progress-head { align-items: flex-start; }
-  .record-grid { grid-template-columns: 1fr; }
-  .game-stat-list { grid-template-columns: 1fr; }
-  .achievements { grid-template-columns: 1fr; }
   .system-actions { gap: 7px; }
   .install-button, .settings-button { min-height: 42px; padding-inline: 10px; }
   .status { font-size: 10px; letter-spacing: 0.06em; }
@@ -222,5 +167,4 @@ body.high-contrast .shortcut { color: #f6f2ff; }
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
-  .achievement-toast { animation: none !important; opacity: 1; transform: translate(-50%, 0); }
 }

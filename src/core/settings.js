@@ -5,13 +5,11 @@ export const DEFAULT_SETTINGS = Object.freeze({
   particles: 'full',
   highContrast: false,
   touchSize: 'normal',
-  dodgeDifficulty: 'normal',
 });
 
 const ALLOWED_VALUES = {
   particles: new Set(['full', 'reduced', 'off']),
   touchSize: new Set(['normal', 'large']),
-  dodgeDifficulty: new Set(['normal', 'relaxed']),
 };
 
 function normalizeSettings(value) {
@@ -29,9 +27,6 @@ function normalizeSettings(value) {
     touchSize: ALLOWED_VALUES.touchSize.has(source.touchSize)
       ? source.touchSize
       : DEFAULT_SETTINGS.touchSize,
-    dodgeDifficulty: ALLOWED_VALUES.dodgeDifficulty.has(source.dodgeDifficulty)
-      ? source.dodgeDifficulty
-      : DEFAULT_SETTINGS.dodgeDifficulty,
   };
 }
 

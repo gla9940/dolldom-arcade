@@ -92,7 +92,7 @@ export const sweeperGame = {
   id: 'sweeper',
   name: 'ABYSS LOG SWEEPER',
   title: '심해 로그 스위퍼',
-  kicker: 'GAME 06 / EXPLORE',
+  kicker: 'GAME 02 / EXPLORE',
   copy: '위험 신호를 읽고 데이터 로그 3개를 회수한 뒤 탈출 지점으로 이동하세요.',
   hint: 'ARROWS — 탐색 · SPACE — 조사 · F — 깃발 · G — 범위 표시',
   accessibility: '10열 6행의 심해 탐사 구역입니다. 방향키로 조사 위치를 옮기고 스페이스 또는 Enter로 칸을 조사합니다. 선택한 칸의 주변 여덟 칸은 청록색 점선으로 은은하게 표시되며 G키 또는 모바일 범위 버튼으로 끌 수 있습니다. F키, 마우스 우클릭 또는 모바일 깃발 버튼으로 예상 위험 칸을 표시합니다. 숫자는 주변 여덟 칸의 위험 개수이며, 데이터 로그 세 개를 찾은 뒤 오른쪽 아래 탈출 지점을 조사하면 성공합니다.',
@@ -332,7 +332,7 @@ export const sweeperGame = {
       context.textBaseline = 'alphabetic';
       context.fillStyle = '#69dce7';
       context.font = '800 11px monospace';
-      context.fillText(state.practice ? 'PRACTICE DIVE // 06' : 'ABYSS DIVE // 06', panelX, 49);
+      context.fillText(state.practice ? 'PRACTICE DIVE // 02' : 'ABYSS DIVE // 02', panelX, 49);
 
       context.fillStyle = palette.muted;
       context.font = '700 11px monospace';

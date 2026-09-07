@@ -10,7 +10,7 @@ export const memoryGame = {
   id: 'memory',
   name: 'GLITCH MEMORY',
   title: '글리치 메모리',
-  kicker: 'GAME 02 / NORMAL',
+  kicker: 'GAME 01 / MEMORY',
   copy: '45초 안에 같은 네온 심볼 여섯 쌍을 모두 찾으세요.',
   hint: 'ARROWS + SPACE / CLICK — 카드 선택',
   accessibility: '4열 3행으로 놓인 열두 장의 카드에서 같은 심볼 여섯 쌍을 찾습니다. 방향키로 카드를 이동하고 스페이스 또는 Enter로 뒤집습니다.',

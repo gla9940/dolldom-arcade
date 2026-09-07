@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  clearProgressData,
   getBestScore,
   getMuted,
   getVolume,
@@ -22,18 +23,21 @@ function useMemoryStorage(initialValues = {}) {
       setItem(key, value) {
         values.set(key, value);
       },
+      removeItem(key) {
+        values.delete(key);
+      },
     },
   };
   return values;
 }
 
 test('최고 점수는 정수로 정규화하고 기존 기록보다 낮아지지 않는다', () => {
-  const values = useMemoryStorage({ 'dolldom-best-runner': '120' });
+  const values = useMemoryStorage({ 'dolldom-best-memory': '120' });
 
-  assert.equal(saveBestScore('runner', 98.9), 120);
-  assert.equal(saveBestScore('runner', 245.8), 245);
-  assert.equal(saveBestScore('runner', Number.NaN), 245);
-  assert.equal(values.get('dolldom-best-runner'), '245');
+  assert.equal(saveBestScore('memory', 98.9), 120);
+  assert.equal(saveBestScore('memory', 245.8), 245);
+  assert.equal(saveBestScore('memory', Number.NaN), 245);
+  assert.equal(values.get('dolldom-best-memory'), '245');
 });
 
 test('손상된 저장값과 localStorage 오류를 안전하게 처리한다', () => {
@@ -72,4 +76,10 @@ test('음량을 유효 범위로 제한하고 첫 방문 안내 상태를 저장
 
   saveGuideSeen();
   assert.equal(hasSeenGuide(), true);
+});
+
+test('사용하지 않는 플레이어 진행 데이터를 제거한다', () => {
+  const values = useMemoryStorage({ 'dolldom-progress': '{"version":2}' });
+  clearProgressData();
+  assert.equal(values.has('dolldom-progress'), false);
 });
