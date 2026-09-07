@@ -2,7 +2,13 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createGameRegistry, games } from '../../src/games/index.js';
-import { createDiveBoard, isNeighborCell, toggleCellFlag } from '../../src/games/sweeper/game.js';
+import {
+  createDiveBoard,
+  isLogicallySolvable,
+  isNeighborCell,
+  SWEEPER_DIFFICULTIES,
+  toggleCellFlag,
+} from '../../src/games/sweeper/game.js';
 
 function createContextStub() {
   const gradient = { addColorStop() {} };
@@ -128,6 +134,17 @@ test('심해 로그 스위퍼 보드는 안전한 시작점과 유효한 위험 
         && Math.abs(candidateRow - row) <= 1;
     }).length;
     assert.equal(cell.adjacentHazards, nearbyHazards);
+  });
+});
+
+test('심해 로그 스위퍼는 난이도별 크기와 위험 수를 적용하고 추리 가능한 보드만 만든다', () => {
+  Object.values(SWEEPER_DIFFICULTIES).forEach((difficulty) => {
+    const board = createDiveBoard(() => 0.42, difficulty.id);
+    assert.equal(board.length, difficulty.columns * difficulty.rows);
+    assert.equal(board.filter(({ kind }) => kind === 'hazard').length, difficulty.hazards);
+    assert.equal(board.filter(({ kind }) => kind === 'log').length, difficulty.logs);
+    assert.equal(board.at(-1).kind, 'exit');
+    assert.equal(isLogicallySolvable(board, difficulty), true);
   });
 });
 

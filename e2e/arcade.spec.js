@@ -115,6 +115,9 @@ test('심해 로그 연습 모드는 시간 무제한이며 진행 데이터를 
   const practiceMode = page.getByRole('button', { name: /연습 모드/ });
   const normalMode = page.getByRole('button', { name: /일반 모드/ });
   await expect(normalMode).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: '이지', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: '미디움', exact: true }).click();
+  await expect(page.getByRole('button', { name: '미디움', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await practiceMode.click();
   await expect(practiceMode).toHaveAttribute('aria-pressed', 'true');
   await expect(normalMode).toHaveAttribute('aria-pressed', 'false');

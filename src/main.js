@@ -88,6 +88,7 @@ function createArcadeApp() {
   const overlayBest = requiredElement('#overlay-best');
   const resultStats = requiredElement('#result-stats');
   const gameModes = requiredElement('#game-modes');
+  const gameDifficulties = requiredElement('#game-difficulties');
   const quickGuide = requiredElement('#quick-guide');
   const overlayAction = requiredElement('#overlay-action');
   const scoreElement = requiredElement('#live-score');
@@ -144,6 +145,7 @@ function createArcadeApp() {
   let activeDefinition = games[0];
   let activeGame = null;
   let activeMode = null;
+  let activeDifficulty = null;
   let status = 'ready';
   let score = 0;
   let displayedScore = null;
@@ -271,6 +273,7 @@ function createArcadeApp() {
     bestScore = 0,
     showGuide = false,
     showModes = false,
+    showDifficulties = false,
     countdown = false,
   }) {
     overlayKicker.textContent = kicker;
@@ -280,6 +283,7 @@ function createArcadeApp() {
     resultStats.hidden = !showResults;
     quickGuide.hidden = !showGuide;
     gameModes.hidden = !showModes || !activeDefinition.modes?.length;
+    gameDifficulties.hidden = !showDifficulties || !activeDefinition.difficulties?.length;
     if (showResults) {
       overlayScore.textContent = String(Math.floor(score)).padStart(4, '0');
       overlayBest.textContent = String(bestScore).padStart(4, '0');
@@ -297,6 +301,7 @@ function createArcadeApp() {
       action: '게임 시작',
       showGuide: !guideSeen,
       showModes: true,
+      showDifficulties: true,
     });
     updatePauseButton();
   }
@@ -339,6 +344,38 @@ function createArcadeApp() {
     gameModes.replaceChildren(...buttons);
   }
 
+  function syncDifficultyButtons() {
+    gameDifficulties.querySelectorAll('[data-difficulty]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.difficulty === activeDifficulty));
+    });
+  }
+
+  function selectDifficulty(difficultyId) {
+    if (!activeDefinition.difficulties?.some(({ id }) => id === difficultyId)) return;
+    activeDifficulty = difficultyId;
+    syncDifficultyButtons();
+    resetActiveGame();
+    showReady();
+    sound.play('select');
+    const difficulty = activeDefinition.difficulties.find(({ id }) => id === difficultyId);
+    announce(`${difficulty?.label ?? difficultyId} 난이도 선택`);
+  }
+
+  function renderDifficultyButtons() {
+    const buttons = (activeDefinition.difficulties ?? []).map((difficulty) => {
+      const button = document.createElement('button');
+      button.className = 'game-difficulty';
+      button.type = 'button';
+      button.dataset.difficulty = difficulty.id;
+      button.setAttribute('aria-pressed', String(difficulty.id === activeDifficulty));
+      button.textContent = difficulty.label;
+      button.title = difficulty.description;
+      button.addEventListener('click', () => selectDifficulty(difficulty.id), { signal });
+      return button;
+    });
+    gameDifficulties.replaceChildren(...buttons);
+  }
+
   function endGame(message, finalScore = score) {
     if (status === 'gameover') return;
 
@@ -377,6 +414,7 @@ function createArcadeApp() {
       sound,
       settings,
       getMode: () => activeMode,
+      getDifficulty: () => activeDifficulty,
       onScore: setScore,
       onEnd: endGame,
     });
@@ -491,7 +529,11 @@ function createArcadeApp() {
     activeMode = activeDefinition.defaultMode
       ?? activeDefinition.modes?.[0]?.id
       ?? null;
+    activeDifficulty = activeDefinition.defaultDifficulty
+      ?? activeDefinition.difficulties?.[0]?.id
+      ?? null;
     renderModeButtons();
+    renderDifficultyButtons();
     touchControls.setActions(activeDefinition.touchControls ?? []);
     status = 'ready';
     createActiveGame();
