@@ -9,62 +9,62 @@ const FINISH_X = 684;
 
 export const TETHER_LEVELS = Object.freeze([
   {
-    start: { x: 62, y: 270, velocityX: 155, velocityY: -350 },
-    anchors: [{ x: 200, y: 105 }, { x: 420, y: 112 }],
+    start: { x: 62, y: 306, velocityX: 0, velocityY: -440 },
+    anchors: [{ x: 190, y: 110 }, { x: 420, y: 112 }],
     pads: [{ x: 18, y: 318, width: 125 }, { x: 548, y: 318, width: 130 }],
   },
   {
-    start: { x: 58, y: 255, velocityX: 165, velocityY: -380 },
+    start: { x: 58, y: 306, velocityX: 0, velocityY: -440 },
     anchors: [{ x: 178, y: 82 }, { x: 350, y: 150 }, { x: 530, y: 78 }],
     pads: [{ x: 18, y: 318, width: 105 }, { x: 292, y: 300, width: 82 }, { x: 580, y: 318, width: 100 }],
   },
   {
-    start: { x: 62, y: 272, velocityX: 175, velocityY: -410 },
+    start: { x: 62, y: 306, velocityX: 0, velocityY: -445 },
     anchors: [{ x: 210, y: 165 }, { x: 375, y: 62 }, { x: 545, y: 165 }],
     pads: [{ x: 18, y: 318, width: 110 }, { x: 300, y: 318, width: 75 }, { x: 595, y: 318, width: 82 }],
   },
   {
-    start: { x: 54, y: 245, velocityX: 185, velocityY: -390 },
+    start: { x: 54, y: 302, velocityX: 0, velocityY: -445 },
     anchors: [{ x: 160, y: 70 }, { x: 315, y: 178 }, { x: 465, y: 68 }, { x: 585, y: 170 }],
     pads: [{ x: 14, y: 314, width: 95 }, { x: 250, y: 300, width: 70 }, { x: 610, y: 314, width: 65 }],
   },
   {
-    start: { x: 58, y: 260, velocityX: 190, velocityY: -430 },
+    start: { x: 58, y: 306, velocityX: 0, velocityY: -450 },
     anchors: [{ x: 185, y: 150 }, { x: 315, y: 55 }, { x: 445, y: 155 }, { x: 565, y: 70 }],
     pads: [{ x: 15, y: 318, width: 105 }, { x: 350, y: 318, width: 62 }, { x: 612, y: 318, width: 64 }],
   },
   {
-    start: { x: 56, y: 250, velocityX: 200, velocityY: -430 },
+    start: { x: 56, y: 304, velocityX: 0, velocityY: -450 },
     anchors: [{ x: 155, y: 62 }, { x: 285, y: 175 }, { x: 410, y: 54 }, { x: 525, y: 175 }, { x: 625, y: 72 }],
     pads: [{ x: 14, y: 316, width: 92 }, { x: 220, y: 316, width: 55 }, { x: 450, y: 316, width: 55 }, { x: 630, y: 316, width: 48 }],
   },
   {
-    start: { x: 54, y: 262, velocityX: 205, velocityY: -440 },
+    start: { x: 54, y: 306, velocityX: 0, velocityY: -455 },
     anchors: [{ x: 145, y: 145 }, { x: 270, y: 58 }, { x: 390, y: 172 }, { x: 510, y: 72 }, { x: 625, y: 150 }],
     pads: [{ x: 12, y: 318, width: 88 }, { x: 330, y: 310, width: 52 }, { x: 640, y: 318, width: 38 }],
   },
   {
-    start: { x: 52, y: 252, velocityX: 210, velocityY: -445 },
+    start: { x: 52, y: 304, velocityX: 0, velocityY: -455 },
     anchors: [{ x: 132, y: 64 }, { x: 252, y: 166 }, { x: 372, y: 62 }, { x: 492, y: 170 }, { x: 612, y: 66 }],
     pads: [{ x: 12, y: 316, width: 84 }, { x: 286, y: 316, width: 48 }, { x: 600, y: 316, width: 70 }],
   },
   {
-    start: { x: 50, y: 260, velocityX: 215, velocityY: -450 },
+    start: { x: 50, y: 306, velocityX: 0, velocityY: -460 },
     anchors: [{ x: 138, y: 172 }, { x: 242, y: 56 }, { x: 350, y: 178 }, { x: 458, y: 54 }, { x: 564, y: 176 }, { x: 642, y: 82 }],
     pads: [{ x: 10, y: 318, width: 82 }, { x: 196, y: 304, width: 42 }, { x: 410, y: 304, width: 42 }, { x: 642, y: 318, width: 32 }],
   },
   {
-    start: { x: 48, y: 248, velocityX: 220, velocityY: -455 },
+    start: { x: 48, y: 304, velocityX: 0, velocityY: -460 },
     anchors: [{ x: 125, y: 58 }, { x: 225, y: 185 }, { x: 330, y: 50 }, { x: 435, y: 184 }, { x: 540, y: 52 }, { x: 635, y: 170 }],
     pads: [{ x: 10, y: 316, width: 78 }, { x: 274, y: 316, width: 40 }, { x: 492, y: 316, width: 40 }, { x: 650, y: 316, width: 26 }],
   },
   {
-    start: { x: 46, y: 258, velocityX: 225, velocityY: -460 },
+    start: { x: 46, y: 306, velocityX: 0, velocityY: -465 },
     anchors: [{ x: 118, y: 165 }, { x: 210, y: 52 }, { x: 305, y: 188 }, { x: 400, y: 48 }, { x: 495, y: 188 }, { x: 590, y: 54 }, { x: 652, y: 156 }],
     pads: [{ x: 8, y: 318, width: 76 }, { x: 164, y: 308, width: 38 }, { x: 352, y: 308, width: 38 }, { x: 540, y: 308, width: 38 }, { x: 652, y: 318, width: 24 }],
   },
   {
-    start: { x: 44, y: 250, velocityX: 230, velocityY: -465 },
+    start: { x: 44, y: 304, velocityX: 0, velocityY: -465 },
     anchors: [{ x: 110, y: 54 }, { x: 195, y: 190 }, { x: 282, y: 48 }, { x: 370, y: 192 }, { x: 458, y: 46 }, { x: 546, y: 190 }, { x: 634, y: 52 }],
     pads: [{ x: 8, y: 316, width: 72 }, { x: 238, y: 316, width: 34 }, { x: 414, y: 316, width: 34 }, { x: 650, y: 316, width: 22 }],
   },
@@ -110,6 +110,7 @@ export const tetherGame = {
       state.anchorIndex = null;
       state.ropeLength = 0;
       state.pointerHeld = false;
+      state.hasTethered = false;
       state.trail.length = 0;
       if (countFall) {
         state.falls += 1;
@@ -134,7 +135,7 @@ export const tetherGame = {
         anchorIndex: null,
         ropeLength: 0,
         pointerHeld: false,
-        wasActionPressed: false,
+        hasTethered: false,
         score: 0,
         falls: 0,
         totalFalls: 0,
@@ -151,11 +152,11 @@ export const tetherGame = {
       const level = TETHER_LEVELS[state.levelIndex];
       const reachable = findReachableAnchor(state.player, level.anchors);
       if (!reachable) {
-        sound.play('wrong');
         return false;
       }
       state.anchorIndex = reachable.index;
       state.ropeLength = Math.max(62, reachable.distance);
+      state.hasTethered = true;
       sound.play('flip');
       return true;
     }
@@ -216,7 +217,7 @@ export const tetherGame = {
     function simulateStep(deltaTime) {
       const previousY = state.player.y;
       state.player.velocityY += GRAVITY * deltaTime;
-      state.player.velocityX += FORWARD_ACCELERATION * deltaTime;
+      if (state.hasTethered) state.player.velocityX += FORWARD_ACCELERATION * deltaTime;
       const speed = Math.hypot(state.player.velocityX, state.player.velocityY);
       if (speed > MAX_SPEED) {
         state.player.velocityX = state.player.velocityX / speed * MAX_SPEED;
@@ -243,9 +244,9 @@ export const tetherGame = {
       }
 
       const actionPressed = input?.isPressed('action') ?? false;
-      if (actionPressed && !state.wasActionPressed) attach();
-      if (!actionPressed && state.wasActionPressed && !state.pointerHeld) detach();
-      state.wasActionPressed = actionPressed;
+      const wantsTether = actionPressed || state.pointerHeld;
+      if (wantsTether && state.anchorIndex === null) attach();
+      else if (!wantsTether) detach();
       state.levelTime += deltaTime;
 
       const substepCount = Math.max(1, Math.ceil(deltaTime / (1 / 120)));

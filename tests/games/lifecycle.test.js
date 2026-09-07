@@ -240,6 +240,10 @@ test('네온 테더는 범위 안에서 가장 가까운 상단 앵커를 선택
   );
   assert.equal(result.index, 0);
   assert.equal(TETHER_LEVELS.length, 12);
+  TETHER_LEVELS.forEach((level) => {
+    assert.equal(level.start.velocityX, 0);
+    assert.equal(level.start.y, level.pads[0].y - 12);
+  });
 });
 
 test('네온 테더는 공통 액션을 누르고 놓아 연결과 해제를 처리한다', () => {
