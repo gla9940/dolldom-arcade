@@ -10,7 +10,11 @@ import {
   toggleCellFlag,
 } from '../../src/games/sweeper/game.js';
 import { getMinimumMoves, GRIDLOCK_LEVELS } from '../../src/games/gridlock/game.js';
-import { findReachableAnchor, TETHER_LEVELS } from '../../src/games/tether/game.js';
+import {
+  findReachableAnchor,
+  getBounceVelocityX,
+  TETHER_LEVELS,
+} from '../../src/games/tether/game.js';
 
 function createContextStub() {
   const gradient = { addColorStop() {} };
@@ -269,4 +273,11 @@ test('네온 테더는 공통 액션을 누르고 놓아 연결과 해제를 처
 
   assert.ok(sounds.includes('flip'));
   assert.ok(sounds.includes('select'));
+});
+
+test('네온 테더는 첫 연결 전까지 바운스 패드에서 제자리로 튄다', () => {
+  assert.equal(getBounceVelocityX(0, false), 0);
+  assert.equal(getBounceVelocityX(80, false), 0);
+  assert.equal(getBounceVelocityX(80, true), 145);
+  assert.equal(getBounceVelocityX(180, true), 215);
 });

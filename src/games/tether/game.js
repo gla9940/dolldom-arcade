@@ -81,6 +81,11 @@ export function findReachableAnchor(player, anchors, maxLength = MAX_ROPE_LENGTH
     .sort((first, second) => first.distance - second.distance)[0] ?? null;
 }
 
+export function getBounceVelocityX(currentVelocityX, hasTethered) {
+  if (!hasTethered) return 0;
+  return Math.max(145, currentVelocityX + 35);
+}
+
 export const tetherGame = {
   id: 'tether',
   name: 'NEON TETHER',
@@ -210,7 +215,10 @@ export const tetherGame = {
       if (!pad) return;
       state.player.y = pad.y - PLAYER_RADIUS;
       state.player.velocityY = -440;
-      state.player.velocityX = Math.max(145, state.player.velocityX + 35);
+      state.player.velocityX = getBounceVelocityX(
+        state.player.velocityX,
+        state.hasTethered,
+      );
       sound.play('match');
     }
 
