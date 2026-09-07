@@ -10,6 +10,7 @@ import {
   toggleCellFlag,
 } from '../../src/games/sweeper/game.js';
 import { getMinimumMoves, GRIDLOCK_LEVELS } from '../../src/games/gridlock/game.js';
+import { findReachableAnchor, TETHER_LEVELS } from '../../src/games/tether/game.js';
 
 function createContextStub() {
   const gradient = { addColorStop() {} };
@@ -230,4 +231,38 @@ test('네온 블록 탈출의 모든 스테이지는 유효하고 목표 이동 
   GRIDLOCK_LEVELS.forEach((level, index) => {
     assert.equal(getMinimumMoves(level), level.par, `${index + 1} 스테이지의 PAR가 잘못되었습니다.`);
   });
+});
+
+test('네온 테더는 범위 안에서 가장 가까운 상단 앵커를 선택한다', () => {
+  const result = findReachableAnchor(
+    { x: 100, y: 220 },
+    [{ x: 180, y: 100 }, { x: 120, y: 390 }, { x: 500, y: 80 }],
+  );
+  assert.equal(result.index, 0);
+  assert.equal(TETHER_LEVELS.length, 12);
+});
+
+test('네온 테더는 공통 액션을 누르고 놓아 연결과 해제를 처리한다', () => {
+  let pressed = true;
+  const sounds = [];
+  const game = games.find(({ id }) => id === 'tether').create({
+    context: createContextStub(),
+    width: 720,
+    height: 360,
+    input: { isPressed() { return pressed; } },
+    sound: { play(name) { sounds.push(name); } },
+    onScore() {},
+    onEnd() {},
+  });
+
+  game.init();
+  game.onAction('action');
+  game.update(1 / 60);
+  pressed = false;
+  game.update(1 / 60);
+  game.render();
+  game.destroy();
+
+  assert.ok(sounds.includes('flip'));
+  assert.ok(sounds.includes('select'));
 });

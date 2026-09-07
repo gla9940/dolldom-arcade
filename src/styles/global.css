@@ -73,6 +73,7 @@ button:focus-visible, a:focus-visible, canvas:focus-visible, input:focus-visible
 .thumb.one { background: linear-gradient(135deg, #271444, #0a332b); }
 .thumb.two { background: linear-gradient(135deg, #35102e, #16113c); }
 .thumb.three { background: linear-gradient(135deg, #14274a, #2e1545); }
+.thumb.four { background: linear-gradient(135deg, #172d35, #40204f); }
 .thumb.six { background: linear-gradient(135deg, #071f31, #143d43); }
 .badge { position: absolute; left: 10px; top: 10px; background: #060509cc; border: 1px solid #ffffff25; border-radius: 20px; padding: 5px 8px; font-size: 10px; color: var(--lime); }
 .card h3 { margin: 13px 0 4px; }

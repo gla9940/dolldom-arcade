@@ -1,6 +1,7 @@
 import { memoryGame } from './memory/game.js';
 import { sweeperGame } from './sweeper/game.js';
 import { gridlockGame } from './gridlock/game.js';
+import { tetherGame } from './tether/game.js';
 
 function validateGameDefinition(game, index) {
   const label = game?.id || `index ${index}`;
@@ -49,6 +50,7 @@ export const games = createGameRegistry([
   memoryGame,
   sweeperGame,
   gridlockGame,
+  tetherGame,
 ]);
 
 export const gamesById = new Map(games.map((game) => [game.id, game]));

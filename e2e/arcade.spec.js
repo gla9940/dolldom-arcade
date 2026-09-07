@@ -11,7 +11,7 @@ test('메인 화면과 정적 리소스가 정상적으로 표시된다', async 
   page.on('pageerror', (error) => pageErrors.push(error.message));
 
   await expect(page).toHaveTitle(/돌돔의 공간/);
-  await expect(page.locator('[data-game]')).toHaveCount(3);
+  await expect(page.locator('[data-game]')).toHaveCount(4);
   await expect(page.getByRole('button', { name: '게임 크게 보기' })).toBeVisible();
 
   const assetState = await page.evaluate(() => ({
@@ -125,6 +125,20 @@ test('네온 블록 탈출은 마우스 드래그로 첫 스테이지를 해결�
   await expect(page.locator('#live-score')).toHaveText('SCORE 0500');
 });
 
+test('네온 테더는 Space 누르기와 놓기 입력으로 실행된다', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.locator('[data-game="tether"]').click();
+  await expect(page.locator('#game-name')).toHaveText('NEON TETHER');
+  await page.getByRole('button', { name: '게임 시작', exact: true }).click();
+  await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
+  await page.keyboard.down('Space');
+  await page.waitForTimeout(180);
+  await page.keyboard.up('Space');
+  await page.waitForTimeout(180);
+  expect(errors).toEqual([]);
+});
+
 test('동작 줄이기 설정에서도 핵심 UI가 즉시 표시된다', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.reload();
@@ -187,6 +201,12 @@ test.describe('모바일 화면', () => {
     const actionButton = page.getByRole('button', { name: '액션' });
     await expect(actionButton).toHaveCSS('height', '74px');
     expect(await actionButton.evaluate((button) => getComputedStyle(button, '::after').content)).toBe('"조사"');
+
+    await page.locator('[data-game="tether"]').click();
+    await page.getByRole('button', { name: '게임 시작', exact: true }).click();
+    await expect(page.locator('#overlay')).toHaveClass(/hidden/, { timeout: 3_000 });
+    await expect(page.locator('#touch-controls')).toHaveAttribute('data-layout', 'action');
+    await expect(page.getByRole('button', { name: '액션' })).toBeVisible();
   });
 });
 
